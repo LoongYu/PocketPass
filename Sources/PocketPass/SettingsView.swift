@@ -87,14 +87,6 @@ struct SettingsView: View {
                 )
                 SettingsDivider()
                 SettingsPickerRow(
-                    icon: "globe",
-                    title: "语言",
-                    subtitle: "选择应用界面使用的语言。",
-                    selection: Bindable(store).appLanguage,
-                    options: AppLanguage.allCases.map { ($0, $0.rawValue) }
-                )
-                SettingsDivider()
-                SettingsPickerRow(
                     icon: "timer",
                     title: "自动锁定",
                     subtitle: "应用离开前台后开始计时。",
@@ -127,6 +119,14 @@ struct SettingsView: View {
                     subtitle: "可选择深色、亮色或跟随 macOS 外观。",
                     selection: Bindable(store).appearanceMode,
                     options: AppearanceMode.allCases.map { ($0, $0.rawValue) }
+                )
+                SettingsDivider()
+                SettingsPickerRow(
+                    icon: "globe",
+                    title: "语言",
+                    subtitle: "选择应用界面使用的语言。",
+                    selection: Bindable(store).appLanguage,
+                    options: AppLanguage.allCases.map { ($0, $0.rawValue) }
                 )
                 SettingsDivider()
                 SettingsPickerRow(
