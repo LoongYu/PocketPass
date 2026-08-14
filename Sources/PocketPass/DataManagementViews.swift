@@ -37,7 +37,7 @@ struct ExportDataView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack { Text("导出数据").font(.title2.bold()); Spacer(); Button("关闭") { dismiss() }.buttonStyle(.bordered).disabled(isPreparing) }
-            Picker("格式", selection: $format) { ForEach(Format.allCases) { Text($0.rawValue).tag($0) } }
+            Picker("格式", selection: $format) { ForEach(Format.allCases) { Text(LocalizedStringKey($0.rawValue)).tag($0) } }
                 .pickerStyle(.segmented)
                 .disabled(isPreparing)
             if format == .backup {
@@ -68,7 +68,9 @@ struct ExportDataView: View {
             if !errorMessage.isEmpty { Text(errorMessage).font(.caption).foregroundStyle(.red) }
             HStack {
                 Spacer()
-                Button(isPreparing ? "正在准备…" : "准备并选择保存位置") { prepare() }
+                Button { prepare() } label: {
+                    Text(LocalizedStringKey(isPreparing ? "正在准备…" : "准备并选择保存位置"))
+                }
                     .buttonStyle(.borderedProminent).tint(PocketTheme.accent).foregroundStyle(.black)
                     .disabled(isPreparing)
             }
@@ -79,7 +81,10 @@ struct ExportDataView: View {
                           defaultFilename: exportFilename) { result in
                 switch result {
                 case .success:
-                    resultMessage = "已导出 \(totalCount) 个账户项目、\(exportedAccountCount) 个登录账号"
+                    resultMessage = store.appLanguage.text(
+                        "已导出 \(totalCount) 个账户项目、\(exportedAccountCount) 个登录账号",
+                        "Exported \(totalCount) items and \(exportedAccountCount) logins"
+                    )
                     progress = 1
                 case .failure(let error):
                     errorMessage = error.localizedDescription
@@ -90,7 +95,10 @@ struct ExportDataView: View {
 
     private func prepare() {
         if format == .backup, (password.count < 6 || password != confirmation) {
-            errorMessage = "请输入一致的6位以上备份密码"
+            errorMessage = store.appLanguage.text(
+                "请输入一致的6位以上备份密码",
+                "Enter matching backup passwords of at least 6 characters"
+            )
             return
         }
         var snapshot = store.snapshot
@@ -166,7 +174,12 @@ struct ImportDataView: View {
         VStack(alignment: .leading, spacing: 18) {
             HStack { Text("导入数据").font(.title2.bold()); Spacer(); Button("关闭") { dismiss() }.buttonStyle(.bordered).disabled(isImporting) }
             Button { showingImporter = true } label: {
-                Label(filename.isEmpty ? "选择 .pocketpass、JSON、CSV 或 Markdown 文件" : filename, systemImage: "doc.badge.plus")
+                Label {
+                    if filename.isEmpty { Text("选择 .pocketpass、JSON、CSV 或 Markdown 文件") }
+                    else { Text(filename) }
+                } icon: {
+                    Image(systemName: "doc.badge.plus")
+                }
                     .frame(maxWidth: .infinity)
             }.buttonStyle(.plain).padding(14).background(PocketTheme.card).clipShape(Capsule()).disabled(isImporting)
             if let data, DataTransferService.isEncryptedBackup(data) {
@@ -179,7 +192,8 @@ struct ImportDataView: View {
                     ProgressView(value: progress)
                         .tint(PocketTheme.accent)
                     HStack {
-                        Text(isImporting ? "正在导入账户数据" : resultMessage)
+                        if isImporting { Text("正在导入账户数据") }
+                        else { Text(resultMessage) }
                         Spacer()
                         Text("\(processedCount) / \(totalCount) 个账户项目")
                     }
@@ -193,7 +207,9 @@ struct ImportDataView: View {
             if !errorMessage.isEmpty { Text(errorMessage).font(.caption).foregroundStyle(.red) }
             HStack {
                 Spacer()
-                Button(isImporting ? "正在导入…" : "开始导入") { importData() }
+                Button { importData() } label: {
+                    Text(LocalizedStringKey(isImporting ? "正在导入…" : "开始导入"))
+                }
                     .buttonStyle(.borderedProminent).tint(PocketTheme.accent).foregroundStyle(.black)
                     .disabled(data == nil || isImporting || !resultMessage.isEmpty)
             }
@@ -236,10 +252,16 @@ struct ImportDataView: View {
                 processedCount = snapshot.items.count
                 totalCount = snapshot.items.count
                 progress = 1
-                resultMessage = "新增 \(summary.inserted) 个，更新 \(summary.updated) 个，跳过重复 \(summary.skipped) 个；导入 \(summary.accounts) 个登录账号"
+                resultMessage = store.appLanguage.text(
+                    "新增 \(summary.inserted) 个，更新 \(summary.updated) 个，跳过重复 \(summary.skipped) 个；导入 \(summary.accounts) 个登录账号",
+                    "Added \(summary.inserted), updated \(summary.updated), skipped \(summary.skipped) duplicates; imported \(summary.accounts) logins"
+                )
                 errorMessage = ""
             } catch {
-                errorMessage = "导入失败，请检查文件格式和备份密码"
+                errorMessage = store.appLanguage.text(
+                    "导入失败，请检查文件格式和备份密码",
+                    "Import failed. Check the file format and backup password."
+                )
             }
             isImporting = false
         }

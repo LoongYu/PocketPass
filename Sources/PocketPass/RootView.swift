@@ -160,9 +160,9 @@ private struct CategoryStrip: View {
                             store.selectedCategoryID = category.id
                         } label: {
                             if store.selectedCategoryID == category.id {
-                                Label(category.name, systemImage: "checkmark")
+                                Label(LocalizedStringKey(category.name), systemImage: "checkmark")
                             } else {
-                                Text(category.name)
+                                Text(LocalizedStringKey(category.name))
                             }
                         }
                     }
@@ -192,7 +192,7 @@ private struct CategoryOverflowLabel: View {
                 } else {
                     Image(systemName: category.icon)
                 }
-                Text(category.name).lineLimit(1)
+                Text(LocalizedStringKey(category.name)).lineLimit(1)
             } else {
                 Image(systemName: "ellipsis")
                 Text("更多")
@@ -224,7 +224,7 @@ private struct CategoryPill: View {
                 } else {
                     Image(systemName: icon)
                 }
-                Text(name)
+                Text(LocalizedStringKey(name))
             }
                 .font(.caption.bold()).padding(.horizontal, 12).padding(.vertical, 9)
                 .background(selected ? color.opacity(0.85) : PocketTheme.card)
@@ -296,7 +296,7 @@ private struct SummaryCard: View {
 private struct Stat: View {
     let icon: String; let value: String; let title: String
     var body: some View {
-        HStack { Image(systemName: icon).foregroundStyle(PocketTheme.accent); Text(value).bold(); Text(title).foregroundStyle(PocketTheme.muted) }
+        HStack { Image(systemName: icon).foregroundStyle(PocketTheme.accent); Text(value).bold(); Text(LocalizedStringKey(title)).foregroundStyle(PocketTheme.muted) }
             .frame(maxWidth: .infinity).padding(12).background(PocketTheme.inset).clipShape(RoundedRectangle(cornerRadius: 13))
     }
 }
@@ -321,7 +321,7 @@ private struct ItemDetail: View {
                     VaultIconView(symbol: item.symbol, data: item.iconData, size: 60, cornerRadius: 17)
                     VStack(alignment: .leading, spacing: 5) {
                         Text(item.name).font(.headline.bold())
-                        Text(categoryName).font(.callout).foregroundStyle(PocketTheme.muted)
+                        Text(LocalizedStringKey(categoryName)).font(.callout).foregroundStyle(PocketTheme.muted)
                     }
                     Spacer()
                 }
@@ -488,7 +488,7 @@ private struct DetailField: View {
     var body: some View {
         HStack(spacing: 15) {
             VStack(alignment: .leading, spacing: 7) {
-                Text(label).font(.caption).foregroundStyle(PocketTheme.muted)
+                Text(LocalizedStringKey(label)).font(.caption).foregroundStyle(PocketTheme.muted)
                 Text(secret && !reveal ? String(repeating: "•", count: max(8, value.count)) : value)
                     .font(.body.monospaced())
                     .foregroundStyle(PocketTheme.primary.opacity(0.94))
@@ -530,7 +530,7 @@ private struct DetailInfoCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
-            Text(label).font(.headline).foregroundStyle(PocketTheme.muted)
+            Text(LocalizedStringKey(label)).font(.headline).foregroundStyle(PocketTheme.muted)
             Text(value)
                 .font(.body)
                 .foregroundStyle(accent ? PocketTheme.accent : PocketTheme.primary.opacity(0.85))
@@ -588,10 +588,13 @@ private struct LockOverlay: View {
         errorMessage = ""
         Task {
             do {
-                try await store.appLockService.authenticate()
+                try await store.appLockService.authenticate(language: store.appLanguage)
                 store.showingLockScreen = false
             } catch {
-                errorMessage = "验证未完成，请使用 Touch ID 或设备密码重试"
+                errorMessage = store.appLanguage.text(
+                    "验证未完成，请使用 Touch ID 或设备密码重试",
+                    "Authentication was not completed. Try Touch ID or your Mac password again."
+                )
             }
             authenticating = false
         }

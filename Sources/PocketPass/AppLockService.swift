@@ -8,7 +8,7 @@ final class AppLockService {
         return LAContext().canEvaluatePolicy(.deviceOwnerAuthentication, error: &error)
     }
 
-    func authenticate() async throws {
+    func authenticate(language: AppLanguage) async throws {
         let context = LAContext()
         context.localizedCancelTitle = "取消"
         var error: NSError?
@@ -17,7 +17,10 @@ final class AppLockService {
         }
         try await context.evaluatePolicy(
             .deviceOwnerAuthentication,
-            localizedReason: "使用 Touch ID 或设备密码解锁口袋密码"
+            localizedReason: language.text(
+                "使用 Touch ID 或设备密码解锁口袋密码",
+                "Unlock PocketPass with Touch ID or your Mac password"
+            )
         )
     }
 }

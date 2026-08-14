@@ -46,7 +46,7 @@ struct AddFieldPickerView: View {
                                 .font(.system(size: 17, weight: .semibold))
                                 .foregroundStyle(PocketTheme.primary.opacity(0.78))
                                 .frame(width: 26)
-                            Text(template.name)
+                            Text(LocalizedStringKey(template.name))
                                 .font(.body.weight(.semibold))
                                 .foregroundStyle(PocketTheme.primary.opacity(0.9))
                             Spacer()

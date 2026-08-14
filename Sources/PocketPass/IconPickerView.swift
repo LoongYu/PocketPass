@@ -12,6 +12,7 @@ struct IconPickerView: View {
 
     @Binding var selectedIcon: String
     @Binding var selectedIconData: Data?
+    @Environment(VaultStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var source: Source = .library
     @State private var searchText = ""
@@ -78,7 +79,7 @@ struct IconPickerView: View {
             let accessing = url.startAccessingSecurityScopedResource()
             defer { if accessing { url.stopAccessingSecurityScopedResource() } }
             guard let data = try? Data(contentsOf: url), data.count <= 5_000_000 else {
-                errorMessage = "图片无法读取或超过5 MB"; return
+                errorMessage = store.appLanguage.text("图片无法读取或超过5 MB", "The image cannot be read or exceeds 5 MB"); return
             }
             selectedIcon = "photo.fill"; selectedIconData = data; dismiss()
         }
@@ -114,7 +115,7 @@ struct IconPickerView: View {
                         searchText = ""
                     }
                 } label: {
-                    Text(item.rawValue).font(.caption.bold()).frame(maxWidth: .infinity)
+                    Text(LocalizedStringKey(item.rawValue)).font(.caption.bold()).frame(maxWidth: .infinity)
                         .padding(.vertical, 9).contentShape(Rectangle())
                         .background {
                             if source == item {
@@ -135,7 +136,7 @@ struct IconPickerView: View {
                 Button("搜索") { searchAppStore() }.buttonStyle(.borderedProminent)
                     .tint(PocketTheme.accent).foregroundStyle(.black).disabled(searchText.isEmpty || isLoading)
             }
-            Text("搜索\(appStoreRegion.name)区 App Store 应用并使用其图标")
+            Text("搜索所选地区的 App Store 应用并使用其图标")
                 .font(.caption).foregroundStyle(PocketTheme.muted)
             if isLoading { ProgressView().frame(maxWidth: .infinity) }
             if !errorMessage.isEmpty { Text(errorMessage).font(.caption).foregroundStyle(.red) }
@@ -165,10 +166,10 @@ struct IconPickerView: View {
                     appStoreResults = []
                     errorMessage = ""
                 } label: {
-                    if appStoreRegion == region {
-                        Label("\(region.flag)  \(region.name)", systemImage: "checkmark")
-                    } else {
-                        Text("\(region.flag)  \(region.name)")
+                    HStack {
+                        if appStoreRegion == region { Image(systemName: "checkmark") }
+                        Text(region.flag)
+                        Text(LocalizedStringKey(region.name))
                     }
                 }
             }
@@ -234,7 +235,7 @@ struct IconPickerView: View {
         errorMessage = ""; isLoading = true
         Task {
             do { appStoreResults = try await RemoteIconService.searchAppStore(searchText, region: appStoreRegion) }
-            catch { errorMessage = "App Store 搜索失败，请稍后重试" }
+            catch { errorMessage = store.appLanguage.text("App Store 搜索失败，请稍后重试", "App Store search failed. Try again later.") }
             isLoading = false
         }
     }
@@ -246,7 +247,7 @@ struct IconPickerView: View {
                 selectedIconData = try await RemoteIconService.downloadImage(result.artworkUrl100)
                 selectedIcon = "app.fill"
                 dismiss()
-            } catch { errorMessage = "图标下载失败"; isLoading = false }
+            } catch { errorMessage = store.appLanguage.text("图标下载失败", "Icon download failed"); isLoading = false }
         }
     }
 
@@ -257,7 +258,7 @@ struct IconPickerView: View {
                 selectedIconData = try await RemoteIconService.favicon(for: website)
                 selectedIcon = "globe"
                 dismiss()
-            } catch { errorMessage = "未能获取该网站的图标"; isLoading = false }
+            } catch { errorMessage = store.appLanguage.text("未能获取该网站的图标", "Could not fetch an icon from this website"); isLoading = false }
         }
     }
 }

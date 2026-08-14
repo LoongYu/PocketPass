@@ -49,7 +49,7 @@ struct SettingsView: View {
                         proxy.scrollTo(section, anchor: .top)
                     }
                 } label: {
-                    Label(section.title, systemImage: section.icon)
+                    Label(LocalizedStringKey(section.title), systemImage: section.icon)
                         .font(.callout.weight(.semibold))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 14)
@@ -84,6 +84,14 @@ struct SettingsView: View {
                             }
                         }
                     )
+                )
+                SettingsDivider()
+                SettingsPickerRow(
+                    icon: "globe",
+                    title: "语言",
+                    subtitle: "选择应用界面使用的语言。",
+                    selection: Bindable(store).appLanguage,
+                    options: AppLanguage.allCases.map { ($0, $0.rawValue) }
                 )
                 SettingsDivider()
                 SettingsPickerRow(
@@ -214,7 +222,7 @@ private struct SettingsSectionView<Content: View>: View {
     @ViewBuilder let content: Content
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(title).font(.headline.bold())
+            Text(LocalizedStringKey(title)).font(.headline.bold())
             content
         }
     }
@@ -247,9 +255,9 @@ private struct SettingsRowLabel: View {
                 .foregroundStyle(PocketTheme.muted)
                 .frame(width: 26)
             VStack(alignment: .leading, spacing: 3) {
-                Text(title).font(.callout.weight(.semibold)).foregroundStyle(PocketTheme.primary)
+                Text(LocalizedStringKey(title)).font(.callout.weight(.semibold)).foregroundStyle(PocketTheme.primary)
                 if !subtitle.isEmpty {
-                    Text(subtitle).font(.caption).foregroundStyle(PocketTheme.muted).lineLimit(2)
+                    Text(LocalizedStringKey(subtitle)).font(.caption).foregroundStyle(PocketTheme.muted).lineLimit(2)
                 }
             }
         }
@@ -305,7 +313,7 @@ private struct SettingsStatusRow: View {
         HStack(spacing: 16) {
             SettingsRowLabel(icon: icon, title: title, subtitle: subtitle)
             Spacer(minLength: 20)
-            Text(status)
+            Text(LocalizedStringKey(status))
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(PocketTheme.accent)
                 .padding(.horizontal, 11)
@@ -329,7 +337,7 @@ private struct SettingsPickerRow<Value: Hashable>: View {
             Spacer(minLength: 20)
             Picker("", selection: $selection) {
                 ForEach(Array(options.enumerated()), id: \.offset) { _, option in
-                    Text(option.1).tag(option.0)
+                    Text(LocalizedStringKey(option.1)).tag(option.0)
                 }
             }
             .labelsHidden()
@@ -401,8 +409,8 @@ private struct PrivacyLine: View {
         HStack(alignment: .top, spacing: 14) {
             Image(systemName: icon).foregroundStyle(PocketTheme.accent).frame(width: 24)
             VStack(alignment: .leading, spacing: 4) {
-                Text(title).font(.headline)
-                Text(detail).font(.callout).foregroundStyle(PocketTheme.muted)
+                Text(LocalizedStringKey(title)).font(.headline)
+                Text(LocalizedStringKey(detail)).font(.callout).foregroundStyle(PocketTheme.muted)
             }
         }
         .padding(16)

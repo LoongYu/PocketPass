@@ -7,8 +7,10 @@ enum VaultStorageError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .malformedCiphertext: "本地密码库文件已损坏或无法解密"
-        case .malformedLocalKey: "本地加密密钥已损坏"
+        case .malformedCiphertext:
+            AppLanguage.current.text("本地密码库文件已损坏或无法解密", "The local vault is damaged or cannot be decrypted")
+        case .malformedLocalKey:
+            AppLanguage.current.text("本地加密密钥已损坏", "The local encryption key is damaged")
         }
     }
 }

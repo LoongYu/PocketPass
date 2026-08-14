@@ -36,6 +36,7 @@ lipo -create \
 INFO_PLIST="$APP_PATH/Contents/Info.plist"
 plutil -create xml1 "$INFO_PLIST"
 plutil -insert CFBundleDisplayName -string "$APP_NAME" "$INFO_PLIST"
+plutil -insert CFBundleDevelopmentRegion -string zh-Hans "$INFO_PLIST"
 plutil -insert CFBundleExecutable -string "$EXECUTABLE_NAME" "$INFO_PLIST"
 plutil -insert CFBundleIconFile -string PocketLogo.icns "$INFO_PLIST"
 plutil -insert CFBundleIdentifier -string com.loongyu.pocketpass "$INFO_PLIST"
@@ -61,6 +62,14 @@ for spec in \
 done
 iconutil -c icns "$ICONSET" -o "$APP_PATH/Contents/Resources/PocketLogo.icns"
 cp "$ICON_SOURCE" "$APP_PATH/Contents/Resources/PocketLogo.png"
+mkdir -p "$APP_PATH/Contents/Resources/en.lproj"
+cp "$PROJECT_DIR/Sources/PocketPass/Resources/en.lproj/Localizable.strings" \
+  "$APP_PATH/Contents/Resources/en.lproj/Localizable.strings"
+cp "$PROJECT_DIR/Sources/PocketPass/Resources/en.lproj/InfoPlist.strings" \
+  "$APP_PATH/Contents/Resources/en.lproj/InfoPlist.strings"
+mkdir -p "$APP_PATH/Contents/Resources/zh-Hans.lproj"
+cp "$PROJECT_DIR/Sources/PocketPass/Resources/zh-Hans.lproj/InfoPlist.strings" \
+  "$APP_PATH/Contents/Resources/zh-Hans.lproj/InfoPlist.strings"
 
 xattr -cr "$APP_PATH"
 codesign --force --deep --sign - "$APP_PATH"

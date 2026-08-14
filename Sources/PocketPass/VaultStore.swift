@@ -23,6 +23,9 @@ final class VaultStore {
     var appearanceMode = AppearanceMode(rawValue: UserDefaults.standard.string(forKey: "appearanceMode") ?? "") ?? .dark {
         didSet { UserDefaults.standard.set(appearanceMode.rawValue, forKey: "appearanceMode") }
     }
+    var appLanguage = AppLanguage(rawValue: UserDefaults.standard.string(forKey: "appLanguage") ?? "") ?? .simplifiedChinese {
+        didSet { UserDefaults.standard.set(appLanguage.rawValue, forKey: "appLanguage") }
+    }
     var homeSortMode = HomeSortMode(rawValue: UserDefaults.standard.string(forKey: "homeSortMode") ?? "") ?? .modified {
         didSet { UserDefaults.standard.set(homeSortMode.rawValue, forKey: "homeSortMode") }
     }

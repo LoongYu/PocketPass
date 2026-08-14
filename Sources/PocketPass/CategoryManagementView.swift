@@ -65,7 +65,7 @@ struct CategoryManagementView: View {
                         HStack(spacing: 12) {
                             CategoryIconView(symbol: category.icon, data: category.iconData, color: category.color)
                             VStack(alignment: .leading) {
-                                Text(category.name).font(.title3.bold())
+                                Text(LocalizedStringKey(category.name)).font(.title3.bold())
                                 Text("\(categoryItems.count) 个账户").font(.caption).foregroundStyle(PocketTheme.muted)
                             }
                             Spacer()
@@ -137,7 +137,7 @@ private struct CategoryCard: View {
                     )
                     Spacer(); Text("\(count)").font(.caption.bold())
                 }
-                Text(category.name)
+                Text(LocalizedStringKey(category.name))
                     .font(.caption.bold())
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)

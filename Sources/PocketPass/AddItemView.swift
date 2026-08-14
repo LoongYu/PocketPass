@@ -312,15 +312,15 @@ struct CategoryDropdown: View {
                     selection = category.id
                 } label: {
                     if selection == category.id {
-                        Label(category.name, systemImage: "checkmark")
+                        Label(LocalizedStringKey(category.name), systemImage: "checkmark")
                     } else {
-                        Text(category.name)
+                        Text(LocalizedStringKey(category.name))
                     }
                 }
             }
         } label: {
             HStack {
-                Text(selectedName)
+                Text(LocalizedStringKey(selectedName))
                     .font(.body.weight(.medium))
                     .foregroundStyle(PocketTheme.primary)
                 Spacer()
@@ -345,7 +345,7 @@ struct NoteInputRow: View {
     var body: some View {
         ZStack(alignment: .topLeading) {
             if text.isEmpty {
-                Text(placeholder).foregroundStyle(PocketTheme.muted).padding(.top, 3)
+                Text(LocalizedStringKey(placeholder)).foregroundStyle(PocketTheme.muted).padding(.top, 3)
             }
             TextEditor(text: $text)
                 .scrollContentBackground(.hidden)

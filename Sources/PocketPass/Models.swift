@@ -16,6 +16,19 @@ enum AppearanceMode: String, CaseIterable, Identifiable {
     }
 }
 
+enum AppLanguage: String, CaseIterable, Identifiable {
+    case simplifiedChinese = "简体中文"
+    case english = "English"
+
+    var id: Self { self }
+    var locale: Locale { Locale(identifier: self == .english ? "en" : "zh-Hans") }
+    func text(_ chinese: String, _ english: String) -> String { self == .english ? english : chinese }
+
+    static var current: AppLanguage {
+        AppLanguage(rawValue: UserDefaults.standard.string(forKey: "appLanguage") ?? "") ?? .simplifiedChinese
+    }
+}
+
 enum HomeSortMode: String, CaseIterable, Identifiable {
     case modified = "最近修改"
     case name = "名称"

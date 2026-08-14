@@ -9,6 +9,7 @@ struct PocketPassApp: App {
         WindowGroup {
             RootView()
                 .environment(store)
+                .environment(\.locale, store.appLanguage.locale)
                 .frame(minWidth: 1080, minHeight: 680)
                 .preferredColorScheme(store.appearanceMode.colorScheme)
                 .onChange(of: scenePhase) { _, phase in
