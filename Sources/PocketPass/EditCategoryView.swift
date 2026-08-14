@@ -30,7 +30,7 @@ struct EditCategoryView: View {
                 Spacer()
                 Button("取消") { dismiss() }.buttonStyle(.bordered)
                 Button("保存") { save() }.buttonStyle(.borderedProminent)
-                    .tint(PocketTheme.accent).foregroundStyle(.black)
+                    .tint(PocketTheme.primaryButton).foregroundStyle(PocketTheme.primaryButtonText)
                     .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
             .padding(22)

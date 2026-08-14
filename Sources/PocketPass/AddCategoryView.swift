@@ -18,7 +18,7 @@ struct AddCategoryView: View {
                 Spacer()
                 Button("取消") { dismiss() }.buttonStyle(.bordered)
                 Button("添加") { addCategory() }.buttonStyle(.borderedProminent)
-                    .tint(PocketTheme.accent).foregroundStyle(.black)
+                    .tint(PocketTheme.primaryButton).foregroundStyle(PocketTheme.primaryButtonText)
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
             }
             .padding(22)

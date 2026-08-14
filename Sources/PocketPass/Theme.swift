@@ -31,8 +31,8 @@ enum PocketTheme {
         light: NSColor(calibratedWhite: 0, alpha: 0.045),
         dark: NSColor(calibratedWhite: 0, alpha: 0.18)
     )
-    static let primaryButton = Color.primary
-    static let primaryButtonText = background
+    static let primaryButton = accent
+    static let primaryButtonText = Color.white
 
     private static func adaptive(light: NSColor, dark: NSColor) -> Color {
         Color(nsColor: NSColor(name: nil) { appearance in
