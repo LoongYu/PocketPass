@@ -22,7 +22,7 @@ let subtitleStyle: [NSAttributedString.Key: Any] = [
 title.draw(at: NSPoint(x: 36, y: 380), withAttributes: titleStyle)
 subtitle.draw(at: NSPoint(x: 36, y: 350), withAttributes: subtitleStyle)
 
-let accent = NSColor(calibratedRed: 1, green: 0.63, blue: 0, alpha: 1)
+let accent = NSColor(calibratedRed: 253.0 / 255.0, green: 191.0 / 255.0, blue: 2.0 / 255.0, alpha: 1)
 accent.setStroke()
 let arrow = NSBezierPath()
 arrow.lineWidth = 8

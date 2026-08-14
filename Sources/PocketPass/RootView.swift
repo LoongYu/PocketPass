@@ -444,7 +444,7 @@ private struct SummaryCard: View {
             }
         }
         .padding(20)
-        .background(LinearGradient(colors: [PocketTheme.accent.opacity(0.52), .orange.opacity(0.19)], startPoint: .topLeading, endPoint: .bottomTrailing))
+        .background(LinearGradient(colors: [PocketTheme.accent.opacity(0.52), PocketTheme.accentDeep.opacity(0.20)], startPoint: .topLeading, endPoint: .bottomTrailing))
         .clipShape(RoundedRectangle(cornerRadius: 24))
         .sheet(isPresented: $showingPasswordGenerator) { PasswordGeneratorView() }
     }

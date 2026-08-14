@@ -22,7 +22,9 @@ enum PocketTheme {
         light: NSColor(calibratedRed: 0.86, green: 0.84, blue: 0.80, alpha: 1),
         dark: NSColor(calibratedRed: 0.19, green: 0.17, blue: 0.145, alpha: 1)
     )
-    static let accent = Color(red: 1.0, green: 0.60, blue: 0.02)
+    /// Dominant gold sampled from the official PocketPass lock mark (#FDBF02).
+    static let accent = Color(red: 253.0 / 255.0, green: 191.0 / 255.0, blue: 2.0 / 255.0)
+    static let accentDeep = Color(red: 0.86, green: 0.55, blue: 0.0)
     static let primary = Color.primary
     static let muted = Color.secondary
     static let border = Color.primary.opacity(0.09)

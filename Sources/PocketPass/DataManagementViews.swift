@@ -47,7 +47,7 @@ struct ExportDataView: View {
                 SecureField("再次输入备份密码", text: $confirmation).textFieldStyle(.roundedBorder).disabled(isPreparing)
             } else {
                 Label("此格式包含明文密码，请妥善保管导出文件。", systemImage: "exclamationmark.triangle.fill")
-                    .font(.caption).foregroundStyle(.orange)
+                    .font(.caption).foregroundStyle(PocketTheme.accentDeep)
             }
             if isPreparing || totalCount > 0 {
                 VStack(alignment: .leading, spacing: 8) {
