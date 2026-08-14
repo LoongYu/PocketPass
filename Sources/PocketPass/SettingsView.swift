@@ -31,7 +31,7 @@ struct SettingsView: View {
         .sheet(isPresented: $showingImport) { ImportDataView() }
         .sheet(isPresented: $showingExport) { ExportDataView() }
         .sheet(isPresented: $showingTags) { TagManagementView() }
-        .sheet(isPresented: $showingAbout) { AboutPockitView() }
+        .sheet(isPresented: $showingAbout) { AboutPocketPassView() }
         .sheet(isPresented: $showingPrivacy) { PrivacyInfoView() }
     }
 
@@ -358,7 +358,7 @@ private struct SettingsPickerRow<Value: Hashable>: View {
     }
 }
 
-private struct AboutPockitView: View {
+private struct AboutPocketPassView: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(spacing: 18) {
@@ -370,6 +370,7 @@ private struct AboutPockitView: View {
             }
             InterfaceBrandLogoView(size: 84)
             Text("口袋密码").font(.title.bold())
+            Text("PocketPass").font(.headline).foregroundStyle(.secondary)
             Text("本地优先的原生 Mac 账户密码管理器")
                 .foregroundStyle(PocketTheme.muted)
             Text("支持多登录账号、自定义字段、分类、标签、图片附件、回收站以及本地加密导入导出。")

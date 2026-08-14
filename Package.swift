@@ -2,13 +2,13 @@
 import PackageDescription
 
 let package = Package(
-    name: "pockit",
+    name: "PocketPass",
     platforms: [.macOS("26.0")],
-    products: [.executable(name: "pockit", targets: ["pockit"])],
+    products: [.executable(name: "PocketPass", targets: ["PocketPass"])],
     targets: [
         .executableTarget(
-            name: "pockit",
-            path: "Sources/pockit",
+            name: "PocketPass",
+            path: "Sources/PocketPass",
             resources: [.process("Resources")]
         )
     ]

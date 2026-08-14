@@ -5,7 +5,7 @@ import Foundation
 struct FirstLaunchAndImportValidation {
     static func main() throws {
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("pockit-tests-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("PocketPass-tests-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: directory) }
 
         let store = VaultStore(repository: LocalVaultRepository(directory: directory))

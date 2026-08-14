@@ -1,7 +1,7 @@
-# 口袋密码
+# PocketPass｜口袋密码
 
 <p align="center">
-  <img src="Sources/pockit/Resources/PocketLogo.png" width="160" alt="口袋密码 App Logo">
+  <img src="Sources/PocketPass/Resources/PocketLogo.png" width="160" alt="PocketPass（口袋密码）App Logo">
 </p>
 
 <p align="center">本地优先、原生 SwiftUI 实现的 macOS 账户密码管理器。</p>
@@ -12,7 +12,7 @@
 
 ## 产品定位
 
-口袋密码用于在 Mac 本地集中整理网站、应用和服务的登录信息。应用不会读取 macOS 钥匙串，也不会在当前版本中连接 iCloud；首次启动只提供默认分类，不包含任何演示账户、密码或其他测试数据。
+PocketPass（中文品牌名“口袋密码”）用于在 Mac 本地集中整理网站、应用和服务的登录信息。应用不会读取 macOS 钥匙串，也不会在当前版本中连接 iCloud；首次启动只提供默认分类，不包含任何演示账户、密码或其他测试数据。
 
 ## 已实现功能
 
@@ -51,7 +51,7 @@ V1.0(1) 不接入云端服务。密码库保存在当前用户的：
 
 ## 下载与安装
 
-1. 在 [Releases](../../releases) 下载 `口袋密码-2026081501.dmg`。
+1. 在 [Releases](../../releases) 下载 `PocketPass-2026081501.dmg`。
 2. 打开 DMG，将“口袋密码”拖入 **Applications** 文件夹。
 3. 从“应用程序”目录启动口袋密码。
 
@@ -69,7 +69,7 @@ V1.0(1) 不接入云端服务。密码库保存在当前用户的：
 要求安装 Xcode 及 macOS 26 SDK：
 
 ```bash
-swift run pockit
+swift run PocketPass
 ```
 
 构建正式 Universal App 和 DMG：
@@ -81,7 +81,7 @@ swift run pockit
 生成文件位于：
 
 ```text
-dist/口袋密码-2026081501.dmg
+dist/PocketPass-2026081501.dmg
 ```
 
 ## 隐私与安全说明

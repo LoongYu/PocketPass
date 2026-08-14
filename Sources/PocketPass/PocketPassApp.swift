@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct PockitApp: App {
+struct PocketPassApp: App {
     @State private var store = VaultStore()
     @Environment(\.scenePhase) private var scenePhase
 

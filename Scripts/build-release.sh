@@ -6,8 +6,9 @@ PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 BUILD_DIR="$PROJECT_DIR/.build/release-package"
 DIST_DIR="$PROJECT_DIR/dist"
 APP_NAME="口袋密码"
+EXECUTABLE_NAME="PocketPass"
 APP_PATH="$BUILD_DIR/$APP_NAME.app"
-DMG_NAME="口袋密码-2026081501.dmg"
+DMG_NAME="PocketPass-2026081501.dmg"
 DMG_PATH="$DIST_DIR/$DMG_NAME"
 VOLUME_NAME="口袋密码 V1.0"
 
@@ -23,29 +24,29 @@ for arch in arm64 x86_64; do
   xcrun swiftc \
     -parse-as-library -O \
     -target "$arch-apple-macosx26.0" \
-    "$PROJECT_DIR"/Sources/pockit/*.swift \
-    -o "$BUILD_DIR/pockit-$arch"
+    "$PROJECT_DIR"/Sources/PocketPass/*.swift \
+    -o "$BUILD_DIR/$EXECUTABLE_NAME-$arch"
 done
 
 lipo -create \
-  "$BUILD_DIR/pockit-arm64" \
-  "$BUILD_DIR/pockit-x86_64" \
-  -output "$APP_PATH/Contents/MacOS/pockit"
+  "$BUILD_DIR/$EXECUTABLE_NAME-arm64" \
+  "$BUILD_DIR/$EXECUTABLE_NAME-x86_64" \
+  -output "$APP_PATH/Contents/MacOS/$EXECUTABLE_NAME"
 
 INFO_PLIST="$APP_PATH/Contents/Info.plist"
 plutil -create xml1 "$INFO_PLIST"
 plutil -insert CFBundleDisplayName -string "$APP_NAME" "$INFO_PLIST"
-plutil -insert CFBundleExecutable -string pockit "$INFO_PLIST"
+plutil -insert CFBundleExecutable -string "$EXECUTABLE_NAME" "$INFO_PLIST"
 plutil -insert CFBundleIconFile -string PocketLogo.icns "$INFO_PLIST"
-plutil -insert CFBundleIdentifier -string com.loongyu.pockit "$INFO_PLIST"
-plutil -insert CFBundleName -string "$APP_NAME" "$INFO_PLIST"
+plutil -insert CFBundleIdentifier -string com.loongyu.pocketpass "$INFO_PLIST"
+plutil -insert CFBundleName -string "$EXECUTABLE_NAME" "$INFO_PLIST"
 plutil -insert CFBundlePackageType -string APPL "$INFO_PLIST"
 plutil -insert CFBundleShortVersionString -string 1.0 "$INFO_PLIST"
 plutil -insert CFBundleVersion -string 1 "$INFO_PLIST"
 plutil -insert LSMinimumSystemVersion -string 26.0 "$INFO_PLIST"
 plutil -insert NSHighResolutionCapable -bool true "$INFO_PLIST"
 
-ICON_SOURCE="$PROJECT_DIR/Sources/pockit/Resources/PocketLogo.png"
+ICON_SOURCE="$PROJECT_DIR/Sources/PocketPass/Resources/PocketLogo.png"
 ICONSET="$BUILD_DIR/PocketLogo.iconset"
 mkdir -p "$ICONSET"
 for spec in \
@@ -82,5 +83,5 @@ PYTHONPATH="$DMG_TOOLS_DIR" python3 -m dmgbuild \
 hdiutil verify "$DMG_PATH" >/dev/null
 
 echo "已生成：$DMG_PATH"
-echo "架构：$(lipo -archs "$APP_PATH/Contents/MacOS/pockit")"
+echo "架构：$(lipo -archs "$APP_PATH/Contents/MacOS/$EXECUTABLE_NAME")"
 shasum -a 256 "$DMG_PATH"

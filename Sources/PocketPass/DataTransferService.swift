@@ -5,7 +5,10 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct TransferDocument: FileDocument {
-    static var readableContentTypes: [UTType] { [.json, .commaSeparatedText, DataTransferService.markdownType, UTType(exportedAs: "com.loongyu.pockit.backup")] }
+    static var readableContentTypes: [UTType] {
+        [.json, .commaSeparatedText, DataTransferService.markdownType,
+         DataTransferService.backupType, DataTransferService.legacyBackupType]
+    }
     var data = Data()
 
     init(data: Data = Data()) { self.data = data }
@@ -18,7 +21,8 @@ struct TransferDocument: FileDocument {
 }
 
 enum DataTransferService {
-    static let backupType = UTType(exportedAs: "com.loongyu.pockit.backup", conformingTo: .data)
+    static let backupType = UTType(exportedAs: "com.loongyu.pocketpass.backup", conformingTo: .data)
+    static let legacyBackupType = UTType(importedAs: "com.loongyu.pockit.backup", conformingTo: .data)
     static let markdownType = UTType(filenameExtension: "md") ?? .plainText
     private static let magic = Data("POCKETPASS1".utf8)
 
