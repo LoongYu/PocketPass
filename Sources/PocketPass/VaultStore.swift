@@ -44,9 +44,6 @@ final class VaultStore {
             if let snapshot = try repository.load() {
                 categories = snapshot.categories
                 items = snapshot.items
-                for index in items.indices where items[index].createdAt == nil {
-                    items[index].createdAt = items[index].modifiedAt
-                }
                 tags = Array(Set((snapshot.tags ?? []) + snapshot.items.flatMap(\.tags))).sorted()
                 customIcons = snapshot.customIcons ?? []
                 purgeExpiredTrash()
@@ -90,8 +87,6 @@ final class VaultStore {
             switch homeSortMode {
             case .modified:
                 return lhs.modifiedAt > rhs.modifiedAt
-            case .added:
-                return (lhs.createdAt ?? lhs.modifiedAt) > (rhs.createdAt ?? rhs.modifiedAt)
             case .name:
                 return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
             case .category:
@@ -111,7 +106,7 @@ final class VaultStore {
         let item = VaultItem(id: UUID(), name: name, website: website, categoryID: categoryID,
                              tags: tags, note: note, symbol: symbol, iconData: iconData, attachments: attachments,
                              accounts: accounts,
-                             isFavorite: false, createdAt: .now, modifiedAt: .now, deletedAt: nil)
+                             isFavorite: false, modifiedAt: .now, deletedAt: nil)
         items.insert(item, at: 0)
         self.tags = Array(Set(self.tags + tags)).sorted()
         selectedSection = .home

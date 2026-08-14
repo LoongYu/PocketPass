@@ -31,7 +31,6 @@ enum AppLanguage: String, CaseIterable, Identifiable {
 
 enum HomeSortMode: String, CaseIterable, Identifiable {
     case modified = "最近修改"
-    case added = "添加时间"
     case name = "名称"
     case category = "分类"
     var id: Self { self }
@@ -106,7 +105,6 @@ struct VaultItem: Identifiable, Hashable, Codable {
     var attachments: [ImageAttachment]? = nil
     var accounts: [LoginAccount]
     var isFavorite: Bool
-    var createdAt: Date? = nil
     var modifiedAt: Date
     var deletedAt: Date?
 }
