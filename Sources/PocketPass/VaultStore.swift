@@ -136,10 +136,31 @@ final class VaultStore {
         persist()
     }
 
+    func moveToTrash(_ ids: Set<UUID>) {
+        guard !ids.isEmpty else { return }
+        let deletedAt = Date.now
+        for index in items.indices where ids.contains(items[index].id) && items[index].deletedAt == nil {
+            items[index].deletedAt = deletedAt
+        }
+        if let selectedItemID, ids.contains(selectedItemID) { self.selectedItemID = nil }
+        persist()
+    }
+
     func restore(_ id: UUID) {
         guard let index = items.firstIndex(where: { $0.id == id }) else { return }
         items[index].deletedAt = nil
         items[index].modifiedAt = .now
+        persist()
+    }
+
+    func restore(_ ids: Set<UUID>) {
+        guard !ids.isEmpty else { return }
+        let modifiedAt = Date.now
+        for index in items.indices where ids.contains(items[index].id) && items[index].deletedAt != nil {
+            items[index].deletedAt = nil
+            items[index].modifiedAt = modifiedAt
+        }
+        if let selectedItemID, ids.contains(selectedItemID) { self.selectedItemID = nil }
         persist()
     }
 
@@ -198,6 +219,13 @@ final class VaultStore {
     func permanentlyDelete(_ id: UUID) {
         items.removeAll { $0.id == id }
         if selectedItemID == id { selectedItemID = nil }
+        persist()
+    }
+
+    func permanentlyDelete(_ ids: Set<UUID>) {
+        guard !ids.isEmpty else { return }
+        items.removeAll { ids.contains($0.id) }
+        if let selectedItemID, ids.contains(selectedItemID) { self.selectedItemID = nil }
         persist()
     }
 

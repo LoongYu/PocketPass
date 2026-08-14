@@ -3,6 +3,14 @@
 "首页" = "Home";
 "分类" = "Categories";
 "回收站" = "Trash";
+"选择" = "Select";
+"已选择 %lld 项" = "%lld selected";
+"全选" = "Select All";
+"取消全选" = "Deselect All";
+"恢复" = "Restore";
+"移到回收站" = "Move to Trash";
+"此操作无法撤销。" = "This action cannot be undone.";
+"删除的账户将在回收站保留 30 天。" = "Deleted accounts will remain in Trash for 30 days.";
 "设置" = "Settings";
 "添加账户" = "New Item";
 "编辑账户" = "Edit Item";

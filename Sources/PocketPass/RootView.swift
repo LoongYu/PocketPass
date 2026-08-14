@@ -89,19 +89,43 @@ private struct VaultView: View {
 
 private struct AccountBrowser: View {
     @Environment(VaultStore.self) private var store
+    @State private var isSelecting = false
+    @State private var selectedIDs: Set<UUID> = []
+    @State private var confirmingBatchDelete = false
+
+    private var visibleIDs: Set<UUID> { Set(store.visibleItems.map(\.id)) }
+
+    private var confirmationTitle: String {
+        if store.selectedSection == .trash {
+            store.appLanguage.text("永久删除 \(selectedIDs.count) 个账户？", "Permanently delete \(selectedIDs.count) accounts?")
+        } else {
+            store.appLanguage.text("将 \(selectedIDs.count) 个账户移到回收站？", "Move \(selectedIDs.count) accounts to Trash?")
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             if store.selectedSection == .trash {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("回收站").font(.title2.bold())
-                    Text("删除项目将在 30 天后清除")
-                        .font(.caption).foregroundStyle(PocketTheme.muted)
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("回收站").font(.title2.bold())
+                        Text("删除项目将在 30 天后清除")
+                            .font(.caption).foregroundStyle(PocketTheme.muted)
+                    }
+                    Spacer()
+                    selectionModeButton
                 }
             }
 
             if store.selectedSection == .home {
-                CategoryStrip()
+                HStack(spacing: 10) {
+                    CategoryStrip()
+                    selectionModeButton
+                }
+            }
+
+            if isSelecting {
+                batchToolbar
             }
 
             HStack {
@@ -117,13 +141,126 @@ private struct AccountBrowser: View {
             } else {
                 ScrollView(.vertical, showsIndicators: false) {
                     LazyVStack(spacing: 10) {
-                        ForEach(store.visibleItems) { item in AccountRow(item: item) }
+                        ForEach(store.visibleItems) { item in
+                            AccountRow(
+                                item: item,
+                                isSelecting: isSelecting,
+                                isSelected: selectedIDs.contains(item.id)
+                            ) {
+                                toggleSelection(item.id)
+                            }
+                        }
                     }
                 }
             }
         }
         .padding(24)
         .pocketPanel()
+        .onChange(of: store.selectedSection) { _, _ in stopSelecting() }
+        .onChange(of: store.selectedCategoryID) { _, _ in selectedIDs.formIntersection(visibleIDs) }
+        .onChange(of: store.searchText) { _, _ in selectedIDs.formIntersection(visibleIDs) }
+        .onChange(of: visibleIDs) { _, newValue in
+            selectedIDs.formIntersection(newValue)
+            if newValue.isEmpty { stopSelecting() }
+        }
+        .confirmationDialog(confirmationTitle, isPresented: $confirmingBatchDelete, titleVisibility: .visible) {
+            if store.selectedSection == .trash {
+                Button("永久删除", role: .destructive) { performPermanentDelete() }
+            } else {
+                Button("移到回收站", role: .destructive) { performMoveToTrash() }
+            }
+            Button("取消", role: .cancel) {}
+        } message: {
+            if store.selectedSection == .trash {
+                Text("此操作无法撤销。")
+            } else {
+                Text("删除的账户将在回收站保留 30 天。")
+            }
+        }
+    }
+
+    private var selectionModeButton: some View {
+        Button(isSelecting ? "取消" : "选择") {
+            isSelecting ? stopSelecting() : (isSelecting = true)
+        }
+        .font(.caption.bold())
+        .padding(.horizontal, 13).padding(.vertical, 8)
+        .background(isSelecting ? PocketTheme.elevated : PocketTheme.card)
+        .foregroundStyle(PocketTheme.primary)
+        .clipShape(Capsule())
+        .buttonStyle(.plain)
+        .disabled(store.visibleItems.isEmpty && !isSelecting)
+    }
+
+    private var batchToolbar: some View {
+        HStack(spacing: 10) {
+            Label("已选择 \(selectedIDs.count) 项", systemImage: "checkmark.circle.fill")
+                .font(.callout.weight(.semibold))
+                .foregroundStyle(selectedIDs.isEmpty ? PocketTheme.muted : PocketTheme.accent)
+            Spacer()
+            Button(selectedIDs == visibleIDs && !visibleIDs.isEmpty ? "取消全选" : "全选") {
+                if selectedIDs == visibleIDs { selectedIDs.removeAll() }
+                else { selectedIDs = visibleIDs }
+            }
+            .batchActionStyle()
+
+            if store.selectedSection == .trash {
+                Button { performRestore() } label: {
+                    Label("恢复", systemImage: "arrow.uturn.backward")
+                }
+                .batchActionStyle()
+                .disabled(selectedIDs.isEmpty)
+            }
+
+            Button { confirmingBatchDelete = true } label: {
+                Label(store.selectedSection == .trash ? "永久删除" : "删除", systemImage: "trash")
+            }
+            .batchActionStyle(isDestructive: true)
+            .disabled(selectedIDs.isEmpty)
+        }
+        .padding(10)
+        .background(PocketTheme.inset)
+        .clipShape(Capsule())
+    }
+
+    private func toggleSelection(_ id: UUID) {
+        if selectedIDs.contains(id) { selectedIDs.remove(id) }
+        else { selectedIDs.insert(id) }
+    }
+
+    private func stopSelecting() {
+        isSelecting = false
+        selectedIDs.removeAll()
+    }
+
+    private func performMoveToTrash() {
+        store.moveToTrash(selectedIDs)
+        stopSelecting()
+        store.selectedItemID = store.visibleItems.first?.id
+    }
+
+    private func performRestore() {
+        store.restore(selectedIDs)
+        stopSelecting()
+        store.selectedItemID = store.visibleItems.first?.id
+    }
+
+    private func performPermanentDelete() {
+        store.permanentlyDelete(selectedIDs)
+        stopSelecting()
+        store.selectedItemID = store.visibleItems.first?.id
+    }
+}
+
+private extension View {
+    func batchActionStyle(isDestructive: Bool = false) -> some View {
+        self
+            .font(.caption.weight(.semibold))
+            .padding(.horizontal, 12).padding(.vertical, 7)
+            .foregroundStyle(isDestructive ? Color.red : PocketTheme.primary)
+            .background(PocketTheme.card)
+            .clipShape(Capsule())
+            .buttonStyle(.plain)
     }
 }
 
@@ -237,9 +374,21 @@ private struct CategoryPill: View {
 private struct AccountRow: View {
     @Environment(VaultStore.self) private var store
     let item: VaultItem
+    var isSelecting = false
+    var isSelected = false
+    var selectionAction: () -> Void = {}
     var body: some View {
-        Button { store.selectedItemID = item.id } label: {
+        Button {
+            if isSelecting { selectionAction() }
+            else { store.selectedItemID = item.id }
+        } label: {
             HStack(spacing: 14) {
+                if isSelecting {
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(isSelected ? PocketTheme.accent : PocketTheme.muted)
+                        .frame(width: 22)
+                }
                 VaultIconView(symbol: item.symbol, data: item.iconData)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(item.name).font(.headline)
@@ -247,10 +396,12 @@ private struct AccountRow: View {
                 }
                 Spacer()
                 if item.isFavorite { Image(systemName: "bookmark.fill").foregroundStyle(PocketTheme.accent) }
-                Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(PocketTheme.muted)
+                if !isSelecting {
+                    Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(PocketTheme.muted)
+                }
             }
             .padding(13)
-            .background(store.selectedItemID == item.id ? PocketTheme.elevated : PocketTheme.card.opacity(0.72))
+            .background(isSelected || (!isSelecting && store.selectedItemID == item.id) ? PocketTheme.elevated : PocketTheme.card.opacity(0.72))
             .clipShape(RoundedRectangle(cornerRadius: 16))
         }.buttonStyle(.plain)
     }
