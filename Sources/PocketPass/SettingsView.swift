@@ -6,6 +6,7 @@ struct SettingsView: View {
     @State private var showingImport = false
     @State private var showingExport = false
     @State private var showingTags = false
+    @State private var showingIconLibrary = false
     @State private var showingAbout = false
     @State private var showingPrivacy = false
 
@@ -31,6 +32,7 @@ struct SettingsView: View {
         .sheet(isPresented: $showingImport) { ImportDataView() }
         .sheet(isPresented: $showingExport) { ExportDataView() }
         .sheet(isPresented: $showingTags) { TagManagementView() }
+        .sheet(isPresented: $showingIconLibrary) { CustomIconLibraryView() }
         .sheet(isPresented: $showingAbout) { AboutPocketPassView() }
         .sheet(isPresented: $showingPrivacy) { PrivacyInfoView() }
     }
@@ -145,6 +147,10 @@ struct SettingsView: View {
             SettingsCard {
                 SettingsActionRow(icon: "tag.fill", title: "标签管理", subtitle: "新建、重命名或删除所有账户共用的标签。") {
                     showingTags = true
+                }
+                SettingsDivider()
+                SettingsActionRow(icon: "photo.stack.fill", title: "图标库", subtitle: "上传并管理账户和分类可重复使用的自定义图片图标。") {
+                    showingIconLibrary = true
                 }
                 SettingsDivider()
                 SettingsActionRow(icon: "square.grid.2x2.fill", title: "分类管理", subtitle: "新增、编辑分类的图标、名称和卡片颜色。") {

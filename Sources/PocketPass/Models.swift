@@ -31,6 +31,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
 
 enum HomeSortMode: String, CaseIterable, Identifiable {
     case modified = "最近修改"
+    case added = "添加时间"
     case name = "名称"
     case category = "分类"
     var id: Self { self }
@@ -86,6 +87,13 @@ struct ImageAttachment: Identifiable, Hashable, Codable {
     var data: Data
 }
 
+struct CustomIcon: Identifiable, Hashable, Codable {
+    let id: UUID
+    var name: String
+    var data: Data
+    var addedAt: Date
+}
+
 struct VaultItem: Identifiable, Hashable, Codable {
     let id: UUID
     var name: String
@@ -98,6 +106,7 @@ struct VaultItem: Identifiable, Hashable, Codable {
     var attachments: [ImageAttachment]? = nil
     var accounts: [LoginAccount]
     var isFavorite: Bool
+    var createdAt: Date? = nil
     var modifiedAt: Date
     var deletedAt: Date?
 }
@@ -114,8 +123,9 @@ extension VaultCategory {
 }
 
 struct VaultSnapshot: Codable {
-    var formatVersion = 2
+    var formatVersion = 3
     var categories: [VaultCategory]
     var items: [VaultItem]
     var tags: [String]? = nil
+    var customIcons: [CustomIcon]? = nil
 }

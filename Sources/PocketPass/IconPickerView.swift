@@ -50,6 +50,10 @@ struct IconPickerView: View {
         searchText.isEmpty ? icons : icons.filter { $0.localizedCaseInsensitiveContains(searchText) }
     }
 
+    private var visibleCustomIcons: [CustomIcon] {
+        searchText.isEmpty ? store.customIcons : store.customIcons.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             HStack {
@@ -89,17 +93,38 @@ struct IconPickerView: View {
         VStack(spacing: 14) {
             iconSearch
             ScrollView {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 8), spacing: 11) {
-                    ForEach(visibleIcons, id: \.self) { icon in
-                        Button { choose(icon) } label: {
-                            Image(systemName: icon).font(.system(size: 17, weight: .semibold))
-                                .frame(maxWidth: .infinity).frame(height: 44)
-                                .background(selectedIcon == icon ? PocketTheme.accent.opacity(0.2) : PocketTheme.card)
-                                .foregroundStyle(selectedIcon == icon ? PocketTheme.accent : PocketTheme.primary.opacity(0.82))
-                                .clipShape(Capsule())
-                                .overlay(Capsule()
-                                    .stroke(selectedIcon == icon ? PocketTheme.accent : PocketTheme.border))
-                        }.buttonStyle(.plain).help(icon)
+                VStack(alignment: .leading, spacing: 12) {
+                    if !visibleCustomIcons.isEmpty {
+                        Text("自定义图标").font(.caption.bold()).foregroundStyle(PocketTheme.muted)
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 8), spacing: 11) {
+                            ForEach(visibleCustomIcons) { icon in
+                                Button { choose(icon) } label: {
+                                    if let image = NSImage(data: icon.data) {
+                                        Image(nsImage: image).resizable().scaledToFit()
+                                            .frame(width: 30, height: 30)
+                                            .frame(maxWidth: .infinity).frame(height: 44)
+                                            .background(selectedIconData == icon.data ? PocketTheme.accent.opacity(0.2) : PocketTheme.card)
+                                            .clipShape(Capsule())
+                                            .overlay(Capsule().stroke(selectedIconData == icon.data ? PocketTheme.accent : PocketTheme.border))
+                                    }
+                                }.buttonStyle(.plain).help(icon.name)
+                            }
+                        }
+                    }
+
+                    Text("系统图标").font(.caption.bold()).foregroundStyle(PocketTheme.muted)
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 8), spacing: 11) {
+                        ForEach(visibleIcons, id: \.self) { icon in
+                            Button { choose(icon) } label: {
+                                Image(systemName: icon).font(.system(size: 17, weight: .semibold))
+                                    .frame(maxWidth: .infinity).frame(height: 44)
+                                    .background(selectedIcon == icon && selectedIconData == nil ? PocketTheme.accent.opacity(0.2) : PocketTheme.card)
+                                    .foregroundStyle(selectedIcon == icon && selectedIconData == nil ? PocketTheme.accent : PocketTheme.primary.opacity(0.82))
+                                    .clipShape(Capsule())
+                                    .overlay(Capsule()
+                                        .stroke(selectedIcon == icon && selectedIconData == nil ? PocketTheme.accent : PocketTheme.border))
+                            }.buttonStyle(.plain).help(icon)
+                        }
                     }
                 }.padding(.vertical, 4)
             }
@@ -228,6 +253,12 @@ struct IconPickerView: View {
     private func choose(_ symbol: String) {
         selectedIcon = symbol
         selectedIconData = nil
+        dismiss()
+    }
+
+    private func choose(_ icon: CustomIcon) {
+        selectedIcon = "photo.fill"
+        selectedIconData = icon.data
         dismiss()
     }
 

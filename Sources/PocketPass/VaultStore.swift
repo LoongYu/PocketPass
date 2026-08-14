@@ -31,6 +31,7 @@ final class VaultStore {
     }
     var categories = VaultCategory.samples
     var tags: [String] = []
+    var customIcons: [CustomIcon] = []
     var items: [VaultItem] = []
     var storageError: String?
     private let repository: LocalVaultRepository
@@ -43,7 +44,11 @@ final class VaultStore {
             if let snapshot = try repository.load() {
                 categories = snapshot.categories
                 items = snapshot.items
+                for index in items.indices where items[index].createdAt == nil {
+                    items[index].createdAt = items[index].modifiedAt
+                }
                 tags = Array(Set((snapshot.tags ?? []) + snapshot.items.flatMap(\.tags))).sorted()
+                customIcons = snapshot.customIcons ?? []
                 purgeExpiredTrash()
                 selectedItemID = items.first { $0.deletedAt == nil }?.id
                 return
@@ -85,6 +90,8 @@ final class VaultStore {
             switch homeSortMode {
             case .modified:
                 return lhs.modifiedAt > rhs.modifiedAt
+            case .added:
+                return (lhs.createdAt ?? lhs.modifiedAt) > (rhs.createdAt ?? rhs.modifiedAt)
             case .name:
                 return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
             case .category:
@@ -104,7 +111,7 @@ final class VaultStore {
         let item = VaultItem(id: UUID(), name: name, website: website, categoryID: categoryID,
                              tags: tags, note: note, symbol: symbol, iconData: iconData, attachments: attachments,
                              accounts: accounts,
-                             isFavorite: false, modifiedAt: .now, deletedAt: nil)
+                             isFavorite: false, createdAt: .now, modifiedAt: .now, deletedAt: nil)
         items.insert(item, at: 0)
         self.tags = Array(Set(self.tags + tags)).sorted()
         selectedSection = .home
@@ -189,6 +196,33 @@ final class VaultStore {
         persist()
     }
 
+    func moveCategory(_ sourceID: UUID, to targetID: UUID) {
+        guard sourceID != targetID,
+              let sourceIndex = categories.firstIndex(where: { $0.id == sourceID }),
+              let targetIndex = categories.firstIndex(where: { $0.id == targetID }) else { return }
+        let category = categories.remove(at: sourceIndex)
+        categories.insert(category, at: min(targetIndex, categories.count))
+        persist()
+    }
+
+    func addCustomIcons(_ icons: [CustomIcon]) -> Int {
+        var added = 0
+        for icon in icons {
+            guard customIcons.count < 100,
+                  !customIcons.contains(where: { $0.data == icon.data }) else { continue }
+            customIcons.append(icon)
+            added += 1
+        }
+        customIcons.sort { $0.addedAt > $1.addedAt }
+        if added > 0 { persist() }
+        return added
+    }
+
+    func deleteCustomIcon(_ id: UUID) {
+        customIcons.removeAll { $0.id == id }
+        persist()
+    }
+
     var allTags: [String] { tags.sorted() }
 
     func addTag(_ name: String) {
@@ -229,7 +263,7 @@ final class VaultStore {
         persist()
     }
 
-    var snapshot: VaultSnapshot { .init(categories: categories, items: items, tags: tags) }
+    var snapshot: VaultSnapshot { .init(categories: categories, items: items, tags: tags, customIcons: customIcons) }
 
     func merge(_ snapshot: VaultSnapshot) {
         let categoryMapping = mergeCategories(from: snapshot)
@@ -339,7 +373,19 @@ final class VaultStore {
 
     private func finishMerge(_ snapshot: VaultSnapshot) {
         tags = Array(Set(tags + (snapshot.tags ?? []) + snapshot.items.flatMap(\.tags))).sorted()
+        _ = mergeCustomIcons(snapshot.customIcons ?? [])
         persist()
+    }
+
+    private func mergeCustomIcons(_ imported: [CustomIcon]) -> Int {
+        var added = 0
+        for icon in imported where customIcons.count < 100 {
+            guard !customIcons.contains(where: { $0.id == icon.id || $0.data == icon.data }) else { continue }
+            customIcons.append(icon)
+            added += 1
+        }
+        customIcons.sort { $0.addedAt > $1.addedAt }
+        return added
     }
 
     func purgeExpiredTrash() {
@@ -353,7 +399,7 @@ final class VaultStore {
 
     private func persist() {
         do {
-            try repository.save(.init(categories: categories, items: items, tags: tags))
+            try repository.save(.init(categories: categories, items: items, tags: tags, customIcons: customIcons))
             storageError = nil
         } catch {
             storageError = error.localizedDescription

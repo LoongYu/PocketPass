@@ -6,6 +6,7 @@ struct CategoryManagementView: View {
     @State private var searchText = ""
     @State private var editingCategory: VaultCategory?
     @State private var confirmingDelete = false
+    @State private var dropTargetID: UUID?
 
     private var selectedCategory: VaultCategory? {
         store.categories.first { $0.id == selectedCategoryID }
@@ -25,7 +26,7 @@ struct CategoryManagementView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 3) {
                         Text("分类").font(.title2.bold())
-                        Text("按场景整理你的账户").font(.caption).foregroundStyle(PocketTheme.muted)
+                        Text("按住分类卡片可拖动排序").font(.caption).foregroundStyle(PocketTheme.muted)
                     }
                     Spacer()
                     Button { store.showingAddCategory = true } label: {
@@ -42,9 +43,24 @@ struct CategoryManagementView: View {
                         ForEach(store.categories) { category in
                             CategoryCard(category: category,
                                          count: store.items.filter { $0.categoryID == category.id && $0.deletedAt == nil }.count,
-                                         selected: selectedCategoryID == category.id) {
+                                         selected: selectedCategoryID == category.id,
+                                         isDropTarget: dropTargetID == category.id) {
                                 selectedCategoryID = category.id
                             }
+                            .draggable(category.id.uuidString) {
+                                CategoryDragPreview(category: category)
+                            }
+                            .dropDestination(for: String.self) { values, _ in
+                                guard let rawID = values.first, let sourceID = UUID(uuidString: rawID) else { return false }
+                                withAnimation(.smooth(duration: 0.22)) {
+                                    store.moveCategory(sourceID, to: category.id)
+                                }
+                                dropTargetID = nil
+                                return true
+                            } isTargeted: { targeted in
+                                dropTargetID = targeted ? category.id : (dropTargetID == category.id ? nil : dropTargetID)
+                            }
+                            .help("按住并拖动以调整分类顺序")
                         }
                     }
                     .padding(.trailing, 8)
@@ -122,6 +138,7 @@ private struct CategoryCard: View {
     let category: VaultCategory
     let count: Int
     let selected: Bool
+    let isDropTarget: Bool
     let action: () -> Void
 
     var body: some View {
@@ -145,7 +162,23 @@ private struct CategoryCard: View {
             .padding(11).frame(maxWidth: .infinity, minHeight: 76, alignment: .leading)
             .background(LinearGradient(colors: [category.color.opacity(0.9), category.color.opacity(0.55)], startPoint: .topLeading, endPoint: .bottomTrailing))
             .foregroundStyle(.white).clipShape(RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(selected ? .white : .clear, lineWidth: 2))
+            .overlay(RoundedRectangle(cornerRadius: 14)
+                .stroke(isDropTarget ? PocketTheme.accent : (selected ? .white : .clear), lineWidth: isDropTarget ? 3 : 2))
+            .scaleEffect(isDropTarget ? 1.035 : 1)
         }.buttonStyle(.plain)
+    }
+}
+
+private struct CategoryDragPreview: View {
+    let category: VaultCategory
+
+    var body: some View {
+        HStack(spacing: 9) {
+            CategoryIconView(symbol: category.icon, data: category.iconData, color: category.color, size: 30, cornerRadius: 8)
+            Text(LocalizedStringKey(category.name)).font(.callout.bold())
+        }
+        .padding(.horizontal, 15).padding(.vertical, 11)
+        .background(PocketTheme.elevated)
+        .clipShape(Capsule())
     }
 }
