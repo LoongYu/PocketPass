@@ -10,6 +10,7 @@
 | 导航结构 | 首页、分类、回收站、设置 |
 | 品牌素材 | App 图标使用黑色圆角底板版本；应用内统一使用同款黄色立体锁透明版 |
 | 品牌色 | 全局菜单、主操作按钮、选中状态与安装界面统一采用 Logo 主金色 `#FDBF02` |
+| 品牌名称 | 简体中文界面显示“口袋密码”，英文界面显示“PocketPass”，macOS 应用菜单随应用内语言即时切换 |
 | 状态管理 | `@Observable VaultStore` 统一管理账户、分类、标签、筛选、锁定状态 |
 | 数据模型 | `VaultSnapshot → VaultItem → LoginAccount → CustomField` |
 | 本地存储 | JSON 序列化后使用 AES-GCM 加密，保存到 Application Support |
