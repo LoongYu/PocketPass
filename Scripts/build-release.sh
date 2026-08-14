@@ -62,6 +62,8 @@ for spec in \
 done
 iconutil -c icns "$ICONSET" -o "$APP_PATH/Contents/Resources/PocketLogo.icns"
 cp "$ICON_SOURCE" "$APP_PATH/Contents/Resources/PocketLogo.png"
+cp "$PROJECT_DIR/Sources/PocketPass/Resources/PocketLogoMark.png" \
+  "$APP_PATH/Contents/Resources/PocketLogoMark.png"
 mkdir -p "$APP_PATH/Contents/Resources/en.lproj"
 cp "$PROJECT_DIR/Sources/PocketPass/Resources/en.lproj/Localizable.strings" \
   "$APP_PATH/Contents/Resources/en.lproj/Localizable.strings"
