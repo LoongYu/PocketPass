@@ -57,6 +57,16 @@
 "用户名" = "Username";
 "用户名 / 手机号" = "Username / Phone";
 "密码" = "Password";
+"生成密码" = "Generate Password";
+"生成的密码" = "Generated Password";
+"重新生成" = "Generate Again";
+"密码长度" = "Password Length";
+"大写字母" = "Uppercase Letters";
+"数字" = "Numbers";
+"符号" = "Symbols";
+"复制密码" = "Copy Password";
+"已复制" = "Copied";
+"使用密码" = "Use Password";
 "显示" = "Show";
 "隐藏" = "Hide";
 "复制" = "Copy";

@@ -161,6 +161,7 @@ struct LoginAccountEditor: View {
     let onDelete: () -> Void
     @State private var revealPassword = false
     @State private var showingFieldPicker = false
+    @State private var showingPasswordGenerator = false
 
     var body: some View {
         FormCard {
@@ -187,6 +188,12 @@ struct LoginAccountEditor: View {
                         Image(systemName: revealPassword ? "eye.slash" : "eye")
                             .frame(width: 28, height: 24).background(PocketTheme.controlFill).clipShape(Capsule())
                     }.buttonStyle(.plain)
+                    Button { showingPasswordGenerator = true } label: {
+                        Image(systemName: "die.face.5.fill")
+                            .frame(width: 28, height: 24).background(PocketTheme.controlFill).clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .help("生成密码")
                 }
             }
             ForEach($account.fields) { $field in
@@ -204,6 +211,12 @@ struct LoginAccountEditor: View {
         .sheet(isPresented: $showingFieldPicker) {
             AddFieldPickerView { name, isSecret in
                 account.fields.append(.init(id: UUID(), name: name, value: "", isSecret: isSecret))
+            }
+        }
+        .sheet(isPresented: $showingPasswordGenerator) {
+            PasswordGeneratorView { generatedPassword in
+                account.password = generatedPassword
+                revealPassword = true
             }
         }
     }

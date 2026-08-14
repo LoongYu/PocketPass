@@ -273,14 +273,19 @@ private struct DetailColumn: View {
 
 private struct SummaryCard: View {
     @Environment(VaultStore.self) private var store
+    @State private var showingPasswordGenerator = false
     var activeCount: Int { store.items.filter { $0.deletedAt == nil }.count }
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text("总览").font(.headline)
                 Spacer()
-                Text("本地").font(.caption.bold()).padding(.horizontal, 10).padding(.vertical, 5)
-                    .background(PocketTheme.inset).clipShape(Capsule())
+                Button { showingPasswordGenerator = true } label: {
+                    Label("生成密码", systemImage: "wand.and.stars")
+                        .font(.caption.bold()).padding(.horizontal, 10).padding(.vertical, 7)
+                        .background(PocketTheme.inset).clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
             }
             HStack(spacing: 10) {
                 Stat(icon: "key.fill", value: "\(activeCount)", title: "账户")
@@ -290,6 +295,7 @@ private struct SummaryCard: View {
         .padding(20)
         .background(LinearGradient(colors: [PocketTheme.accent.opacity(0.52), .orange.opacity(0.19)], startPoint: .topLeading, endPoint: .bottomTrailing))
         .clipShape(RoundedRectangle(cornerRadius: 24))
+        .sheet(isPresented: $showingPasswordGenerator) { PasswordGeneratorView() }
     }
 }
 
