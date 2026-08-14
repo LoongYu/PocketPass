@@ -289,7 +289,7 @@ private struct SummaryCard: View {
             }
             HStack(spacing: 10) {
                 Stat(icon: "key.fill", value: "\(activeCount)", title: "账户")
-                Stat(icon: "folder.fill", value: "\(store.categories.count)", title: "分类")
+                Stat(icon: "square.grid.2x2.fill", value: "\(store.categories.count)", title: "分类")
             }
         }
         .padding(20)

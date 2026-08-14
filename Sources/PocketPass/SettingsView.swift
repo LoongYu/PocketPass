@@ -147,7 +147,7 @@ struct SettingsView: View {
                     showingTags = true
                 }
                 SettingsDivider()
-                SettingsActionRow(icon: "folder.fill", title: "分类管理", subtitle: "新增、编辑分类的图标、名称和卡片颜色。") {
+                SettingsActionRow(icon: "square.grid.2x2.fill", title: "分类管理", subtitle: "新增、编辑分类的图标、名称和卡片颜色。") {
                     store.selectedSection = .categories
                     store.selectedCategoryID = nil
                 }

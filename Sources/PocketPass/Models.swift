@@ -50,7 +50,7 @@ enum AppSection: String, CaseIterable, Identifiable {
     var icon: String {
         switch self {
         case .home: "house.fill"
-        case .categories: "bookmark.fill"
+        case .categories: "square.grid.2x2.fill"
         case .trash: "trash.fill"
         case .settings: "gearshape.fill"
         }
