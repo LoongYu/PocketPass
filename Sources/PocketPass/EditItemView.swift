@@ -53,7 +53,7 @@ struct EditItemView: View {
                     .background(PocketTheme.card).clipShape(Capsule())
                 Button("保存") { save() }
                     .buttonStyle(.plain).padding(.horizontal, 18).padding(.vertical, 10)
-                    .background(.white).foregroundStyle(.black).clipShape(Capsule())
+                    .background(PocketTheme.primaryButton).foregroundStyle(PocketTheme.primaryButtonText).clipShape(Capsule())
                     .disabled(name.isEmpty)
             }.padding(.horizontal, 22).padding(.vertical, 14)
             Divider().opacity(0.25)
@@ -70,7 +70,7 @@ struct EditItemView: View {
                             PlainInputRow {
                                 TextField("名称", text: $name)
                                     .font(.body.weight(.medium))
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(PocketTheme.primary)
                             }
                             PlainInputRow {
                                 CategoryDropdown(selection: $categoryID)
@@ -79,7 +79,7 @@ struct EditItemView: View {
                                 Button { showingTagPicker = true } label: {
                                     HStack {
                                         Text(selectedTags.isEmpty ? "标签" : selectedTags.joined(separator: "、"))
-                                            .foregroundStyle(selectedTags.isEmpty ? PocketTheme.muted : .white)
+                                            .foregroundStyle(selectedTags.isEmpty ? PocketTheme.muted : PocketTheme.primary)
                                             .lineLimit(1)
                                         Spacer(); Image(systemName: "tag")
                                     }

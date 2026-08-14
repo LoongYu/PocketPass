@@ -94,10 +94,10 @@ struct IconPickerView: View {
                             Image(systemName: icon).font(.system(size: 17, weight: .semibold))
                                 .frame(maxWidth: .infinity).frame(height: 44)
                                 .background(selectedIcon == icon ? PocketTheme.accent.opacity(0.2) : PocketTheme.card)
-                                .foregroundStyle(selectedIcon == icon ? PocketTheme.accent : .white.opacity(0.82))
+                                .foregroundStyle(selectedIcon == icon ? PocketTheme.accent : PocketTheme.primary.opacity(0.82))
                                 .clipShape(Capsule())
                                 .overlay(Capsule()
-                                    .stroke(selectedIcon == icon ? PocketTheme.accent : .white.opacity(0.08)))
+                                    .stroke(selectedIcon == icon ? PocketTheme.accent : PocketTheme.border))
                         }.buttonStyle(.plain).help(icon)
                     }
                 }.padding(.vertical, 4)
@@ -122,7 +122,7 @@ struct IconPickerView: View {
                                     .matchedGeometryEffect(id: "sourceSelection", in: sourceAnimation)
                             }
                         }
-                }.buttonStyle(.plain).foregroundStyle(source == item ? .white : PocketTheme.muted)
+                }.buttonStyle(.plain).foregroundStyle(source == item ? PocketTheme.primary : PocketTheme.muted)
             }
         }.padding(4).background(PocketTheme.card).clipShape(Capsule())
     }

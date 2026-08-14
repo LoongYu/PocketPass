@@ -2,13 +2,43 @@ import SwiftUI
 import AppKit
 
 enum PocketTheme {
-    static let background = Color(red: 0.055, green: 0.05, blue: 0.045)
-    static let panel = Color(red: 0.105, green: 0.095, blue: 0.085)
-    static let card = Color(red: 0.145, green: 0.13, blue: 0.115)
-    static let input = Color(red: 0.105, green: 0.095, blue: 0.085)
-    static let elevated = Color(red: 0.19, green: 0.17, blue: 0.145)
+    static let background = adaptive(
+        light: NSColor(calibratedRed: 0.965, green: 0.957, blue: 0.945, alpha: 1),
+        dark: NSColor(calibratedRed: 0.055, green: 0.05, blue: 0.045, alpha: 1)
+    )
+    static let panel = adaptive(
+        light: NSColor(calibratedRed: 0.925, green: 0.91, blue: 0.885, alpha: 1),
+        dark: NSColor(calibratedRed: 0.105, green: 0.095, blue: 0.085, alpha: 1)
+    )
+    static let card = adaptive(
+        light: NSColor(calibratedRed: 0.995, green: 0.99, blue: 0.98, alpha: 1),
+        dark: NSColor(calibratedRed: 0.145, green: 0.13, blue: 0.115, alpha: 1)
+    )
+    static let input = adaptive(
+        light: NSColor(calibratedRed: 0.90, green: 0.885, blue: 0.855, alpha: 1),
+        dark: NSColor(calibratedRed: 0.105, green: 0.095, blue: 0.085, alpha: 1)
+    )
+    static let elevated = adaptive(
+        light: NSColor(calibratedRed: 0.86, green: 0.84, blue: 0.80, alpha: 1),
+        dark: NSColor(calibratedRed: 0.19, green: 0.17, blue: 0.145, alpha: 1)
+    )
     static let accent = Color(red: 1.0, green: 0.60, blue: 0.02)
-    static let muted = Color.white.opacity(0.52)
+    static let primary = Color.primary
+    static let muted = Color.secondary
+    static let border = Color.primary.opacity(0.09)
+    static let controlFill = Color.primary.opacity(0.065)
+    static let inset = adaptive(
+        light: NSColor(calibratedWhite: 0, alpha: 0.045),
+        dark: NSColor(calibratedWhite: 0, alpha: 0.18)
+    )
+    static let primaryButton = Color.primary
+    static let primaryButtonText = background
+
+    private static func adaptive(light: NSColor, dark: NSColor) -> Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? dark : light
+        })
+    }
 }
 
 struct PanelModifier: ViewModifier {
@@ -16,7 +46,7 @@ struct PanelModifier: ViewModifier {
         content
             .background(PocketTheme.panel)
             .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 24).stroke(.white.opacity(0.035)))
+            .overlay(RoundedRectangle(cornerRadius: 24).stroke(PocketTheme.border))
     }
 }
 

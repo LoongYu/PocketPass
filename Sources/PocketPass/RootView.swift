@@ -203,7 +203,7 @@ private struct CategoryOverflowLabel: View {
         .font(.caption.bold())
         .padding(.horizontal, 12).padding(.vertical, 9)
         .background(category?.color.opacity(0.85) ?? PocketTheme.card)
-        .foregroundStyle(category == nil ? Color.white.opacity(0.75) : Color.black)
+        .foregroundStyle(category == nil ? PocketTheme.primary.opacity(0.75) : Color.black)
         .clipShape(Capsule())
     }
 }
@@ -228,7 +228,7 @@ private struct CategoryPill: View {
             }
                 .font(.caption.bold()).padding(.horizontal, 12).padding(.vertical, 9)
                 .background(selected ? color.opacity(0.85) : PocketTheme.card)
-                .foregroundStyle(selected ? Color.black : Color.white.opacity(0.75))
+                .foregroundStyle(selected ? Color.black : PocketTheme.primary.opacity(0.75))
                 .clipShape(Capsule())
         }.buttonStyle(.plain)
     }
@@ -280,7 +280,7 @@ private struct SummaryCard: View {
                 Text("总览").font(.headline)
                 Spacer()
                 Text("本地").font(.caption.bold()).padding(.horizontal, 10).padding(.vertical, 5)
-                    .background(.black.opacity(0.28)).clipShape(Capsule())
+                    .background(PocketTheme.inset).clipShape(Capsule())
             }
             HStack(spacing: 10) {
                 Stat(icon: "key.fill", value: "\(activeCount)", title: "账户")
@@ -297,7 +297,7 @@ private struct Stat: View {
     let icon: String; let value: String; let title: String
     var body: some View {
         HStack { Image(systemName: icon).foregroundStyle(PocketTheme.accent); Text(value).bold(); Text(title).foregroundStyle(PocketTheme.muted) }
-            .frame(maxWidth: .infinity).padding(12).background(.black.opacity(0.35)).clipShape(RoundedRectangle(cornerRadius: 13))
+            .frame(maxWidth: .infinity).padding(12).background(PocketTheme.inset).clipShape(RoundedRectangle(cornerRadius: 13))
     }
 }
 
@@ -332,7 +332,7 @@ private struct ItemDetail: View {
                             Label("编辑", systemImage: "pencil")
                                 .font(.body.weight(.semibold))
                                 .padding(.horizontal, 16).padding(.vertical, 9)
-                                .background(.black.opacity(0.18))
+                                .background(PocketTheme.inset)
                                 .clipShape(Capsule())
                         }
                         .buttonStyle(.plain)
@@ -342,7 +342,7 @@ private struct ItemDetail: View {
                                 .font(.body.weight(.semibold))
                                 .foregroundStyle(.red)
                                 .padding(.horizontal, 16).padding(.vertical, 9)
-                                .background(.black.opacity(0.18))
+                                .background(PocketTheme.inset)
                                 .clipShape(Capsule())
                         }
                         .buttonStyle(.plain)
@@ -353,13 +353,13 @@ private struct ItemDetail: View {
                         Button { store.restore(item.id) } label: {
                             Label("恢复账户", systemImage: "arrow.uturn.backward")
                                 .font(.body.weight(.semibold)).padding(.horizontal, 16).padding(.vertical, 9)
-                                .background(.black.opacity(0.18)).clipShape(Capsule())
+                                .background(PocketTheme.inset).clipShape(Capsule())
                         }.buttonStyle(.plain)
                         Button { confirmingPermanentDelete = true } label: {
                             Label("永久删除", systemImage: "trash.slash")
                                 .font(.body.weight(.semibold)).foregroundStyle(.red)
                                 .padding(.horizontal, 16).padding(.vertical, 9)
-                                .background(.black.opacity(0.18)).clipShape(Capsule())
+                                .background(PocketTheme.inset).clipShape(Capsule())
                         }.buttonStyle(.plain)
                         Spacer()
                     }
@@ -439,6 +439,7 @@ private struct ItemDetail: View {
             if let copiedFieldName {
                 Text("已复制\(copiedFieldName)")
                     .font(.callout.weight(.semibold))
+                    .foregroundStyle(.white)
                     .padding(.horizontal, 18)
                     .padding(.vertical, 11)
                     .background(.black.opacity(0.82))
@@ -490,7 +491,7 @@ private struct DetailField: View {
                 Text(label).font(.caption).foregroundStyle(PocketTheme.muted)
                 Text(secret && !reveal ? String(repeating: "•", count: max(8, value.count)) : value)
                     .font(.body.monospaced())
-                    .foregroundStyle(.white.opacity(0.94))
+                    .foregroundStyle(PocketTheme.primary.opacity(0.94))
                     .lineLimit(3)
             }
             Spacer()
@@ -499,7 +500,7 @@ private struct DetailField: View {
                     Image(systemName: reveal ? "eye.slash" : "eye")
                         .font(.body)
                         .frame(width: 30, height: 26)
-                        .background(.white.opacity(0.055)).clipShape(Capsule())
+                        .background(PocketTheme.controlFill).clipShape(Capsule())
                 }
                 .buttonStyle(.plain).foregroundStyle(PocketTheme.muted)
                 .help(reveal ? "隐藏" : "显示")
@@ -510,14 +511,14 @@ private struct DetailField: View {
             } label: {
                 Image(systemName: "doc.on.doc")
                     .frame(width: 30, height: 26)
-                    .background(.white.opacity(0.055)).clipShape(Capsule())
+                    .background(PocketTheme.controlFill).clipShape(Capsule())
             }
                 .font(.body).buttonStyle(.plain).foregroundStyle(PocketTheme.muted)
                 .help("复制")
         }
         .padding(.horizontal, 16).padding(.vertical, 13)
         .frame(maxWidth: .infinity, minHeight: 68, alignment: .leading)
-        .background(.black.opacity(0.18))
+        .background(PocketTheme.inset)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
@@ -532,12 +533,12 @@ private struct DetailInfoCard: View {
             Text(label).font(.headline).foregroundStyle(PocketTheme.muted)
             Text(value)
                 .font(.body)
-                .foregroundStyle(accent ? PocketTheme.accent : .white.opacity(0.85))
+                .foregroundStyle(accent ? PocketTheme.accent : PocketTheme.primary.opacity(0.85))
                 .textSelection(.enabled)
         }
         .padding(.horizontal, 20).padding(.vertical, 17)
         .frame(maxWidth: .infinity, minHeight: 78, alignment: .leading)
-        .background(.black.opacity(0.18))
+        .background(PocketTheme.inset)
         .clipShape(RoundedRectangle(cornerRadius: 18))
     }
 }

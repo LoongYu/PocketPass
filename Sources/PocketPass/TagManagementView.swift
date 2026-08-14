@@ -32,7 +32,7 @@ struct TagManagementView: View {
                             Text(tag); Spacer()
                             Button { editingTag = tag; newName = tag } label: {
                                 Image(systemName: "pencil").frame(width: 32, height: 26)
-                                    .background(.white.opacity(0.05)).clipShape(Capsule())
+                                    .background(PocketTheme.controlFill).clipShape(Capsule())
                             }.buttonStyle(.plain)
                             Button(role: .destructive) { store.deleteTag(tag) } label: {
                                 Image(systemName: "trash").frame(width: 32, height: 26)

@@ -44,11 +44,11 @@ struct AddFieldPickerView: View {
                         HStack(spacing: 18) {
                             Image(systemName: template.icon)
                                 .font(.system(size: 17, weight: .semibold))
-                                .foregroundStyle(.white.opacity(0.78))
+                                .foregroundStyle(PocketTheme.primary.opacity(0.78))
                                 .frame(width: 26)
                             Text(template.name)
                                 .font(.body.weight(.semibold))
-                                .foregroundStyle(.white.opacity(0.9))
+                                .foregroundStyle(PocketTheme.primary.opacity(0.9))
                             Spacer()
                         }
                         .padding(.horizontal, 20)
@@ -119,7 +119,7 @@ private struct CustomFieldNameView: View {
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal, 18).padding(.vertical, 10)
-                .background(.white).foregroundStyle(.black).clipShape(Capsule())
+                .background(PocketTheme.primaryButton).foregroundStyle(PocketTheme.primaryButtonText).clipShape(Capsule())
                 .disabled(trimmedName.isEmpty)
             }
 

@@ -3,8 +3,17 @@ import SwiftUI
 
 enum AppearanceMode: String, CaseIterable, Identifiable {
     case dark = "深色"
+    case light = "亮色"
     case system = "跟随系统"
     var id: Self { self }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .dark: .dark
+        case .light: .light
+        case .system: nil
+        }
+    }
 }
 
 enum HomeSortMode: String, CaseIterable, Identifiable {

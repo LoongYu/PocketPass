@@ -25,7 +25,7 @@ struct TagPickerView: View {
                     dismiss()
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(.white).foregroundStyle(.black)
+                .tint(PocketTheme.primaryButton).foregroundStyle(PocketTheme.primaryButtonText)
             }
 
             HStack(spacing: 12) {
@@ -58,7 +58,7 @@ struct TagPickerView: View {
                                 .frame(maxWidth: .infinity)
                                 .padding(.horizontal, 14).padding(.vertical, 11)
                                 .background(draftSelection.contains(tag) ? PocketTheme.accent : PocketTheme.card)
-                                .foregroundStyle(draftSelection.contains(tag) ? .black : .white)
+                                .foregroundStyle(draftSelection.contains(tag) ? .black : PocketTheme.primary)
                                 .clipShape(Capsule())
                             }
                             .buttonStyle(.plain)

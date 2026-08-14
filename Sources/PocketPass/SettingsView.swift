@@ -55,7 +55,7 @@ struct SettingsView: View {
                         .padding(.horizontal, 14)
                         .frame(height: 44)
                         .background(selection == section ? PocketTheme.accent.opacity(0.32) : .clear)
-                        .foregroundStyle(selection == section ? .white : PocketTheme.muted)
+                        .foregroundStyle(selection == section ? Color.black : PocketTheme.muted)
                         .clipShape(Capsule())
                 }
                 .buttonStyle(.plain)
@@ -120,7 +120,7 @@ struct SettingsView: View {
                 SettingsPickerRow(
                     icon: "circle.lefthalf.filled",
                     title: "主题",
-                    subtitle: "深色或跟随 macOS 外观。",
+                    subtitle: "可选择深色、亮色或跟随 macOS 外观。",
                     selection: Bindable(store).appearanceMode,
                     options: AppearanceMode.allCases.map { ($0, $0.rawValue) }
                 )
@@ -246,12 +246,12 @@ private struct SettingsCard<Content: View>: View {
             .frame(maxWidth: .infinity)
             .background(PocketTheme.card)
             .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 22).stroke(.white.opacity(0.035)))
+            .overlay(RoundedRectangle(cornerRadius: 22).stroke(PocketTheme.border))
     }
 }
 
 private struct SettingsDivider: View {
-    var body: some View { Divider().overlay(.white.opacity(0.07)).padding(.leading, 46) }
+    var body: some View { Divider().overlay(PocketTheme.border).padding(.leading, 46) }
 }
 
 private struct SettingsRowLabel: View {
@@ -265,7 +265,7 @@ private struct SettingsRowLabel: View {
                 .foregroundStyle(PocketTheme.muted)
                 .frame(width: 26)
             VStack(alignment: .leading, spacing: 3) {
-                Text(title).font(.callout.weight(.semibold)).foregroundStyle(.white)
+                Text(title).font(.callout.weight(.semibold)).foregroundStyle(PocketTheme.primary)
                 if !subtitle.isEmpty {
                     Text(subtitle).font(.caption).foregroundStyle(PocketTheme.muted).lineLimit(2)
                 }
@@ -366,7 +366,8 @@ private struct AboutPocketPassView: View {
                 InterfaceBrandLogoView(size: 34)
                 Text("关于口袋密码").font(.title2.bold())
                 Spacer()
-                Button("完成") { dismiss() }.buttonStyle(.borderedProminent).tint(.white).foregroundStyle(.black)
+                Button("完成") { dismiss() }.buttonStyle(.borderedProminent)
+                    .tint(PocketTheme.primaryButton).foregroundStyle(PocketTheme.primaryButtonText)
             }
             InterfaceBrandLogoView(size: 84)
             Text("口袋密码").font(.title.bold())
@@ -394,7 +395,8 @@ private struct PrivacyInfoView: View {
                 InterfaceBrandLogoView(size: 30)
                 Text("隐私说明").font(.title2.bold())
                 Spacer()
-                Button("完成") { dismiss() }.buttonStyle(.borderedProminent).tint(.white).foregroundStyle(.black)
+                Button("完成") { dismiss() }.buttonStyle(.borderedProminent)
+                    .tint(PocketTheme.primaryButton).foregroundStyle(PocketTheme.primaryButtonText)
             }
             PrivacyLine(icon: "lock.shield.fill", title: "本地加密", detail: "账户、密码、分类、标签和图片附件写入本机 AES-GCM 加密密码库。")
             PrivacyLine(icon: "key.slash.fill", title: "不读取钥匙串", detail: "口袋密码不会读取 macOS 钥匙串中的密码或机密信息。")

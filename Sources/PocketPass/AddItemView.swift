@@ -28,7 +28,7 @@ struct AddItemView: View {
                     .background(PocketTheme.card).clipShape(Capsule())
                 Button("添加") { save() }
                     .buttonStyle(.plain).padding(.horizontal, 18).padding(.vertical, 10)
-                    .background(.white).foregroundStyle(.black).clipShape(Capsule())
+                    .background(PocketTheme.primaryButton).foregroundStyle(PocketTheme.primaryButtonText).clipShape(Capsule())
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
             }.padding(.horizontal, 22).padding(.vertical, 14)
             Divider().opacity(0.25)
@@ -48,7 +48,7 @@ struct AddItemView: View {
                             PlainInputRow {
                                 TextField("名称", text: $name)
                                     .font(.body.weight(.medium))
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(PocketTheme.primary)
                             }
                             PlainInputRow {
                                 CategoryDropdown(selection: $categoryID)
@@ -57,7 +57,7 @@ struct AddItemView: View {
                                 Button { showingTagPicker = true } label: {
                                     HStack {
                                         Text(selectedTags.isEmpty ? "标签" : selectedTags.joined(separator: "、"))
-                                            .foregroundStyle(selectedTags.isEmpty ? PocketTheme.muted : .white)
+                                            .foregroundStyle(selectedTags.isEmpty ? PocketTheme.muted : PocketTheme.primary)
                                             .lineLimit(1)
                                         Spacer()
                                         Image(systemName: "tag")
@@ -185,7 +185,7 @@ struct LoginAccountEditor: View {
                     }.textFieldStyle(.plain)
                     Button { revealPassword.toggle() } label: {
                         Image(systemName: revealPassword ? "eye.slash" : "eye")
-                            .frame(width: 28, height: 24).background(.white.opacity(0.05)).clipShape(Capsule())
+                            .frame(width: 28, height: 24).background(PocketTheme.controlFill).clipShape(Capsule())
                     }.buttonStyle(.plain)
                 }
             }
@@ -232,7 +232,7 @@ private struct CustomFieldInputRow: View {
                     Button { revealSecret.toggle() } label: {
                         Image(systemName: revealSecret ? "eye.slash" : "eye")
                             .frame(width: 28, height: 24)
-                            .background(.white.opacity(0.05))
+                            .background(PocketTheme.controlFill)
                             .clipShape(Capsule())
                     }
                     .buttonStyle(.plain)
@@ -322,7 +322,7 @@ struct CategoryDropdown: View {
             HStack {
                 Text(selectedName)
                     .font(.body.weight(.medium))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(PocketTheme.primary)
                 Spacer()
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.caption.weight(.bold))
