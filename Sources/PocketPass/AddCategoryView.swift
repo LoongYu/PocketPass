@@ -17,7 +17,7 @@ struct AddCategoryView: View {
                 Text("添加分类").font(.title3.bold())
                 Spacer()
                 Button("取消") { dismiss() }.buttonStyle(.bordered)
-                Button("添加") { addCategory() }.buttonStyle(.borderedProminent)
+                Button("保存") { addCategory() }.buttonStyle(.borderedProminent)
                     .tint(PocketTheme.primaryButton).foregroundStyle(PocketTheme.primaryButtonText)
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
             }

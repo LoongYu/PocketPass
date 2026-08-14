@@ -114,7 +114,7 @@ private struct CustomFieldNameView: View {
                     .buttonStyle(.plain)
                     .padding(.horizontal, 18).padding(.vertical, 10)
                     .background(PocketTheme.card).clipShape(Capsule())
-                Button("添加") {
+                Button("保存") {
                     onAdd(trimmedName)
                 }
                 .buttonStyle(.plain)

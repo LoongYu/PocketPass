@@ -26,7 +26,7 @@ struct AddItemView: View {
                 Button("取消") { dismiss() }
                     .buttonStyle(.plain).padding(.horizontal, 18).padding(.vertical, 10)
                     .background(PocketTheme.card).clipShape(Capsule())
-                Button("添加") { save() }
+                Button("保存") { save() }
                     .buttonStyle(.plain).padding(.horizontal, 18).padding(.vertical, 10)
                     .background(PocketTheme.primaryButton).foregroundStyle(PocketTheme.primaryButtonText).clipShape(Capsule())
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)

@@ -93,10 +93,6 @@ struct SettingsView: View {
                     selection: Bindable(store).lockAfterMinutes,
                     options: [(0, "立即"), (1, "1 分钟"), (5, "5 分钟"), (15, "15 分钟"), (30, "30 分钟")]
                 )
-                SettingsDivider()
-                SettingsActionRow(icon: "lock.rotation", title: "预览锁定界面", subtitle: "立即检查当前解锁方式。") {
-                    store.showingLockScreen = true
-                }
             }
         }
     }
@@ -147,13 +143,6 @@ struct SettingsView: View {
                     store.selectedSection = .categories
                     store.selectedCategoryID = nil
                 }
-                SettingsDivider()
-                SettingsStatusRow(
-                    icon: "photo.on.rectangle.angled",
-                    title: "账户图标来源",
-                    subtitle: "支持内置图标、9 个常见 App Store 区域、网站图标和相册图片。",
-                    status: "已启用"
-                )
             }
         }
     }
@@ -168,13 +157,6 @@ struct SettingsView: View {
                 SettingsActionRow(icon: "square.and.arrow.up.fill", title: "导出与本地加密备份", subtitle: "加密备份使用独立密码保护，也可导出 JSON、CSV 或 Markdown。") {
                     showingExport = true
                 }
-                SettingsDivider()
-                SettingsStatusRow(
-                    icon: "lock.shield.fill",
-                    title: "本地存储保护",
-                    subtitle: "密码库使用 AES-GCM 加密；应用不会读取系统钥匙串信息。",
-                    status: "已加密"
-                )
             }
         }
     }
