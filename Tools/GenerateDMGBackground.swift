@@ -35,7 +35,7 @@ arrow.line(to: NSPoint(x: 405, y: 218))
 arrow.line(to: NSPoint(x: 380, y: 193))
 arrow.stroke()
 
-let footer = "V1.0(1) · macOS 26 或更高版本"
+let footer = "V1.1(2) · macOS 26 或更高版本"
 footer.draw(at: NSPoint(x: 36, y: 26), withAttributes: [
     .font: NSFont.systemFont(ofSize: 13, weight: .regular),
     .foregroundColor: NSColor(calibratedWhite: 0.46, alpha: 1)

@@ -6,7 +6,7 @@
 
 <p align="center">本地优先、原生 SwiftUI 实现的 macOS 账户密码管理器。</p>
 
-> 当前版本：**V1.0(1)**<br>
+> 当前版本：**V1.1(2)**<br>
 > 系统要求：**macOS 26 或更高版本**<br>
 > 支持架构：**Apple Silicon 与 Intel（Universal Binary）**
 
@@ -37,7 +37,7 @@ PocketPass（中文品牌名“口袋密码”）用于在 Mac 本地集中整�
 
 ### 本地优先
 
-V1.0(1) 不接入云端服务。密码库保存在当前用户的：
+V1.1(2) 不接入云端服务。密码库保存在当前用户的：
 
 ```text
 ~/Library/Application Support/口袋密码/
@@ -55,7 +55,7 @@ V1.0(1) 不接入云端服务。密码库保存在当前用户的：
 
 ## 下载与安装
 
-1. 在 [Releases](../../releases) 下载 `PocketPass-2026081501.dmg`。
+1. 在 [Releases](../../releases) 下载 `PocketPass-2026081502.dmg`。
 2. 打开 DMG，将“口袋密码”拖入 **Applications** 文件夹。
 3. 从“应用程序”目录启动口袋密码。
 
@@ -85,13 +85,13 @@ swift run PocketPass
 生成文件位于：
 
 ```text
-dist/PocketPass-2026081501.dmg
+dist/PocketPass-2026081502.dmg
 ```
 
 ## 隐私与安全说明
 
 - 应用不会主动读取 macOS 钥匙串中的任何信息。
-- V1.0(1) 不上传密码库，也不包含分析、广告或跟踪 SDK。
+- V1.1(2) 不上传密码库，也不包含分析、广告或跟踪 SDK。
 - 应用锁用于阻止他人在应用界面中查看数据，不代替磁盘加密或 macOS 用户账户安全。
 - 设备损坏或应用数据目录丢失可能造成数据无法恢复，请定期创建 `.pocketpass` 加密备份。
 - 本项目尚未接受独立安全审计，不建议在未评估风险的情况下用于高价值生产凭据。
