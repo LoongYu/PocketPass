@@ -161,8 +161,9 @@ Git 标签：`v1.1.0`
 
 ## 五、已有验证能力
 
-当前仓库包含五个独立验证程序，但尚未接入 Swift Package 的标准测试 target 或持续集成：
+当前仓库包含六个独立验证程序，但尚未接入 Swift Package 的标准测试 target 或持续集成：
 
+- `CompletedFeaturesValidation.swift`：综合验证账户、分类、标签、搜索、排序、回收站、本地加密和持久化。
 - `SmokeTests.swift`：验证 JSON、CSV、加密备份、自定义字段、附件和自定义图标的基本往返。
 - `MarkdownTransferValidation.swift`：验证 Markdown 多账户解析及导出后重新导入。
 - `FirstLaunchAndImportValidation.swift`：验证首次启动无测试账户、分类顺序持久化、自定义图标去重和重复导入幂等。
