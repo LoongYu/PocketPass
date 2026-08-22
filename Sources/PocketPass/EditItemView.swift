@@ -119,7 +119,7 @@ struct EditItemView: View {
                 guard case .success(let urls) = result else { return }
                 for url in urls.prefix(5 - attachments.count) {
                     let access = url.startAccessingSecurityScopedResource(); defer { if access { url.stopAccessingSecurityScopedResource() } }
-                    if let data = try? Data(contentsOf: url), data.count <= 5_000_000 {
+                    if let data = try? Data(contentsOf: url), data.count <= VaultStore.maximumAttachmentBytes {
                         attachments.append(.init(id: UUID(), filename: url.lastPathComponent, data: data))
                     }
                 }

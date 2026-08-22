@@ -4,27 +4,36 @@ struct RootView: View {
     @Environment(VaultStore.self) private var store
 
     var body: some View {
-        ZStack {
-            PocketTheme.background.ignoresSafeArea()
-            HStack(spacing: 18) {
-                RailView()
-                Group {
-                    if store.selectedSection == .settings {
-                        SettingsView()
-                    } else if store.selectedSection == .categories {
-                        CategoryManagementView()
-                    } else {
-                        VaultView()
+        Group {
+            if store.showingLockScreen {
+                LockOverlay()
+            } else {
+                ZStack {
+                    PocketTheme.background.ignoresSafeArea()
+                    HStack(spacing: 18) {
+                        RailView()
+                        Group {
+                            if store.selectedSection == .settings {
+                                SettingsView()
+                            } else if store.selectedSection == .categories {
+                                CategoryManagementView()
+                            } else {
+                                VaultView()
+                            }
+                        }
                     }
+                    .padding(20)
                 }
             }
-            .padding(20)
-
-            if store.showingLockScreen { LockOverlay() }
         }
         .buttonBorderShape(.capsule)
         .sheet(isPresented: Bindable(store).showingAddItem) { AddItemView() }
         .sheet(isPresented: Bindable(store).showingAddCategory) { AddCategoryView() }
+        .onChange(of: store.showingLockScreen) { _, isLocked in
+            guard isLocked else { return }
+            store.showingAddItem = false
+            store.showingAddCategory = false
+        }
         .alert("本地密码库错误", isPresented: Binding(
             get: { store.storageError != nil },
             set: { if !$0 { store.storageError = nil } }

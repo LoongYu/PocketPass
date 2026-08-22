@@ -1,8 +1,9 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import PocketPassCore
 
 struct ExportDataView: View {
-    enum Format: String, CaseIterable, Identifiable {
+    enum Format: String, CaseIterable, Identifiable, Sendable {
         case backup = "加密备份"
         case json = "JSON"
         case csv = "CSV"
@@ -101,10 +102,13 @@ struct ExportDataView: View {
             )
             return
         }
-        var snapshot = store.snapshot
-        if format == .csv || format == .markdown {
-            snapshot.items.removeAll { $0.deletedAt != nil }
-        }
+        let snapshot: VaultSnapshot = {
+            var value = store.snapshot
+            if format == .csv || format == .markdown {
+                value.items.removeAll { $0.deletedAt != nil }
+            }
+            return value
+        }()
         resetProgress()
         isPreparing = true
         totalCount = snapshot.items.count
@@ -118,13 +122,17 @@ struct ExportDataView: View {
                 else { await Task.yield() }
             }
             do {
-                switch format {
-                case .backup:
-                    document = .init(data: try DataTransferService.encryptedBackup(snapshot: snapshot, password: password))
-                case .json: document = .init(data: try DataTransferService.json(snapshot: snapshot))
-                case .csv: document = .init(data: DataTransferService.csv(snapshot: snapshot))
-                case .markdown: document = .init(data: DataTransferService.markdown(snapshot: snapshot))
-                }
+                let selectedFormat = format
+                let backupPassword = password
+                let encoded = try await Task.detached(priority: .userInitiated) {
+                    switch selectedFormat {
+                    case .backup: try DataTransferService.encryptedBackup(snapshot: snapshot, password: backupPassword)
+                    case .json: try DataTransferService.json(snapshot: snapshot)
+                    case .csv: DataTransferService.csv(snapshot: snapshot)
+                    case .markdown: DataTransferService.markdown(snapshot: snapshot)
+                    }
+                }.value
+                document = .init(data: encoded)
                 processedCount = totalCount
                 progress = 1
                 errorMessage = ""
@@ -217,13 +225,18 @@ struct ImportDataView: View {
             .buttonBorderShape(.capsule)
             .fileImporter(isPresented: $showingImporter, allowedContentTypes: [DataTransferService.backupType, .json, .commaSeparatedText, DataTransferService.markdownType]) { result in
                 guard case .success(let url) = result else { return }
-                let access = url.startAccessingSecurityScopedResource(); defer { if access { url.stopAccessingSecurityScopedResource() } }
-                do {
-                    data = try Data(contentsOf: url)
-                    filename = url.lastPathComponent
-                    resetImportProgress()
+                Task {
+                    do {
+                        let loaded = try await Task.detached(priority: .userInitiated) {
+                            let access = url.startAccessingSecurityScopedResource()
+                            defer { if access { url.stopAccessingSecurityScopedResource() } }
+                            return try VaultDataTransfer.importData(from: url)
+                        }.value
+                        data = loaded
+                        filename = url.lastPathComponent
+                        resetImportProgress()
+                    } catch { errorMessage = error.localizedDescription }
                 }
-                catch { errorMessage = error.localizedDescription }
             }
     }
 
@@ -233,16 +246,20 @@ struct ImportDataView: View {
         isImporting = true
         Task { @MainActor in
             do {
-                let snapshot: VaultSnapshot
-                if DataTransferService.isEncryptedBackup(data) {
-                    snapshot = try DataTransferService.decryptBackup(data, password: password)
-                } else if ["md", "markdown"].contains((filename as NSString).pathExtension.lowercased()) {
-                    snapshot = try DataTransferService.snapshot(fromMarkdown: data, baseCategories: store.categories)
-                } else if let json = try? DataTransferService.snapshot(fromJSON: data) {
-                    snapshot = json
-                } else {
-                    snapshot = try DataTransferService.snapshot(fromCSV: data, baseCategories: store.categories)
-                }
+                let backupPassword = password
+                let fileExtension = (filename as NSString).pathExtension.lowercased()
+                let baseCategories = store.categories
+                let snapshot = try await Task.detached(priority: .userInitiated) {
+                    if DataTransferService.isEncryptedBackup(data) {
+                        return try DataTransferService.decryptBackup(data, password: backupPassword)
+                    } else if ["md", "markdown"].contains(fileExtension) {
+                        return try DataTransferService.snapshot(fromMarkdown: data, baseCategories: baseCategories)
+                    } else if let json = try? DataTransferService.snapshot(fromJSON: data) {
+                        return json
+                    } else {
+                        return try DataTransferService.snapshot(fromCSV: data, baseCategories: baseCategories)
+                    }
+                }.value
                 totalCount = snapshot.items.count
                 let summary = await store.merge(snapshot) { completed, total in
                     processedCount = completed

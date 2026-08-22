@@ -1,9 +1,14 @@
 import Foundation
+import Observation
+import PocketPassCore
 import SwiftUI
 
+/// macOS 界面状态适配器。数据业务、去重、回收站、分类、标签和持久化
+/// 均由 PocketPassCore.VaultStore 执行，macOS/iOS/iPadOS 不再维护三套逻辑。
 @MainActor
 @Observable
 final class VaultStore {
+    static let maximumAttachmentBytes = PocketPassCore.VaultStore.maximumAttachmentBytes
     var selectedSection: AppSection = .home
     var selectedCategoryID: UUID?
     var selectedItemID: UUID?
@@ -29,45 +34,29 @@ final class VaultStore {
     var homeSortMode = HomeSortMode(rawValue: UserDefaults.standard.string(forKey: "homeSortMode") ?? "") ?? .modified {
         didSet { UserDefaults.standard.set(homeSortMode.rawValue, forKey: "homeSortMode") }
     }
-    var categories = VaultCategory.samples
-    var tags: [String] = []
-    var customIcons: [CustomIcon] = []
-    var items: [VaultItem] = []
+
+    private let core: PocketPassCore.VaultStore
+    private var contentRevision = 0
     var storageError: String?
-    private let repository: LocalVaultRepository
     let appLockService = AppLockService()
     private var autoLockTask: Task<Void, Never>?
 
     init(repository: LocalVaultRepository = LocalVaultRepository()) {
-        self.repository = repository
-        do {
-            if let snapshot = try repository.load() {
-                categories = snapshot.categories
-                items = snapshot.items
-                tags = Array(Set((snapshot.tags ?? []) + snapshot.items.flatMap(\.tags))).sorted()
-                customIcons = snapshot.customIcons ?? []
-                purgeExpiredTrash()
-                selectedItemID = items.first { $0.deletedAt == nil }?.id
-                return
-            }
-        } catch {
-            storageError = error.localizedDescription
-            items = []
-            return
-        }
-        items = []
-        selectedItemID = nil
-        tags = []
-        persist()
+        core = PocketPassCore.VaultStore(repository: repository.core)
+        storageError = core.storageError
+        selectedItemID = core.activeItems().first?.id
     }
+
+    var categories: [VaultCategory] { _ = contentRevision; return core.categories }
+    var items: [VaultItem] { _ = contentRevision; return core.items }
+    var tags: [String] { _ = contentRevision; return core.tags }
+    var customIcons: [CustomIcon] { _ = contentRevision; return core.customIcons }
+    var allTags: [String] { core.allTags }
+    var snapshot: VaultSnapshot { core.snapshot }
 
     var visibleItems: [VaultItem] {
         let filtered = items.filter { item in
-            let sectionMatch: Bool = switch selectedSection {
-            case .categories: item.deletedAt == nil
-            case .trash: item.deletedAt != nil
-            default: item.deletedAt == nil
-            }
+            let sectionMatch = selectedSection == .trash ? item.deletedAt != nil : item.deletedAt == nil
             let categoryMatch = selectedCategoryID == nil || item.categoryID == selectedCategoryID
             let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
             let searchMatch = query.isEmpty || item.name.localizedCaseInsensitiveContains(query)
@@ -75,349 +64,72 @@ final class VaultStore {
                 || item.tags.contains { $0.localizedCaseInsensitiveContains(query) }
                 || item.accounts.contains { account in
                     account.username.localizedCaseInsensitiveContains(query)
-                        || account.fields.contains {
-                            $0.name.localizedCaseInsensitiveContains(query)
-                                || $0.value.localizedCaseInsensitiveContains(query)
-                        }
+                        || account.fields.contains { $0.name.localizedCaseInsensitiveContains(query) || $0.value.localizedCaseInsensitiveContains(query) }
                 }
             return sectionMatch && categoryMatch && searchMatch
         }
         let categoryNames = Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0.name) })
         return filtered.sorted { lhs, rhs in
             switch homeSortMode {
-            case .modified:
-                return lhs.modifiedAt > rhs.modifiedAt
-            case .name:
-                return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
+            case .modified: return lhs.modifiedAt > rhs.modifiedAt
+            case .name: return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
             case .category:
-                let left = categoryNames[lhs.categoryID] ?? ""
-                let right = categoryNames[rhs.categoryID] ?? ""
-                if left == right { return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending }
-                return left.localizedStandardCompare(right) == .orderedAscending
+                let left = categoryNames[lhs.categoryID] ?? "", right = categoryNames[rhs.categoryID] ?? ""
+                return left == right ? lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending : left.localizedStandardCompare(right) == .orderedAscending
             }
         }
     }
 
-    var selectedItem: VaultItem? {
-        items.first { $0.id == selectedItemID }
-    }
+    var selectedItem: VaultItem? { items.first { $0.id == selectedItemID } }
 
     func addItem(name: String, accounts: [LoginAccount], tags: [String], website: String, categoryID: UUID, note: String, symbol: String = "key.fill", iconData: Data? = nil, attachments: [ImageAttachment] = []) {
-        let item = VaultItem(id: UUID(), name: name, website: website, categoryID: categoryID,
-                             tags: tags, note: note, symbol: symbol, iconData: iconData, attachments: attachments,
-                             accounts: accounts,
-                             isFavorite: false, modifiedAt: .now, deletedAt: nil)
-        items.insert(item, at: 0)
-        self.tags = Array(Set(self.tags + tags)).sorted()
-        selectedSection = .home
-        selectedCategoryID = nil
-        selectedItemID = item.id
-        persist()
+        let item = core.addItem(name: name, accounts: accounts, tags: tags, website: website, categoryID: categoryID, note: note, symbol: symbol, iconData: iconData, attachments: attachments)
+        selectedSection = .home; selectedCategoryID = nil; selectedItemID = item.id; touch()
     }
+    func toggleFavorite(_ id: UUID) { core.toggleFavorite(id); touch() }
+    func updateItem(_ item: VaultItem) { core.updateItem(item); touch() }
+    func moveToTrash(_ id: UUID) { moveToTrash([id]) }
+    func moveToTrash(_ ids: Set<UUID>) { core.moveToTrash(ids); if let selectedItemID, ids.contains(selectedItemID) { self.selectedItemID = nil }; touch() }
+    func restore(_ id: UUID) { restore([id]) }
+    func restore(_ ids: Set<UUID>) { core.restore(ids); touch() }
+    func permanentlyDelete(_ id: UUID) { permanentlyDelete([id]) }
+    func permanentlyDelete(_ ids: Set<UUID>) { core.permanentlyDelete(ids); if let selectedItemID, ids.contains(selectedItemID) { self.selectedItemID = nil }; touch() }
 
-    func toggleFavorite(_ id: UUID) {
-        guard let index = items.firstIndex(where: { $0.id == id }) else { return }
-        items[index].isFavorite.toggle()
-        items[index].modifiedAt = .now
-        persist()
-    }
+    func addCategory(name: String, icon: String, iconData: Data? = nil, colorHex: String) { core.addCategory(name: name, icon: icon, iconData: iconData, colorHex: colorHex); touch() }
+    func updateCategory(_ category: VaultCategory) { core.updateCategory(category); touch() }
+    func deleteCategory(_ id: UUID) { core.deleteCategory(id); touch() }
+    func moveCategory(_ sourceID: UUID, to targetID: UUID) { core.moveCategory(sourceID, to: targetID); touch() }
 
-    func updateItem(_ item: VaultItem) {
-        guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
-        var updated = item
-        updated.modifiedAt = .now
-        items[index] = updated
-        tags = Array(Set(tags + updated.tags)).sorted()
-        persist()
-    }
+    func addCustomIcons(_ icons: [CustomIcon]) -> Int { let count = core.addCustomIcons(icons); touch(); return count }
+    func deleteCustomIcon(_ id: UUID) { core.deleteCustomIcon(id); touch() }
+    func addTag(_ name: String) { core.addTag(name); touch() }
+    func renameTag(_ old: String, to new: String) { core.renameTag(old, to: new); touch() }
+    func deleteTag(_ tag: String) { core.deleteTag(tag); touch() }
 
-    func moveToTrash(_ id: UUID) {
-        guard let index = items.firstIndex(where: { $0.id == id }) else { return }
-        items[index].deletedAt = .now
-        selectedItemID = nil
-        persist()
-    }
-
-    func moveToTrash(_ ids: Set<UUID>) {
-        guard !ids.isEmpty else { return }
-        let deletedAt = Date.now
-        for index in items.indices where ids.contains(items[index].id) && items[index].deletedAt == nil {
-            items[index].deletedAt = deletedAt
-        }
-        if let selectedItemID, ids.contains(selectedItemID) { self.selectedItemID = nil }
-        persist()
-    }
-
-    func restore(_ id: UUID) {
-        guard let index = items.firstIndex(where: { $0.id == id }) else { return }
-        items[index].deletedAt = nil
-        items[index].modifiedAt = .now
-        persist()
-    }
-
-    func restore(_ ids: Set<UUID>) {
-        guard !ids.isEmpty else { return }
-        let modifiedAt = Date.now
-        for index in items.indices where ids.contains(items[index].id) && items[index].deletedAt != nil {
-            items[index].deletedAt = nil
-            items[index].modifiedAt = modifiedAt
-        }
-        if let selectedItemID, ids.contains(selectedItemID) { self.selectedItemID = nil }
-        persist()
-    }
-
-    func addCategory(name: String, icon: String, iconData: Data? = nil, colorHex: String) {
-        categories.append(.init(id: UUID(), name: name, icon: icon, iconData: iconData, colorHex: colorHex))
-        persist()
-    }
-
-    func updateCategory(_ category: VaultCategory) {
-        guard let index = categories.firstIndex(where: { $0.id == category.id }) else { return }
-        categories[index] = category
-        persist()
-    }
-
-    func deleteCategory(_ id: UUID) {
-        guard categories.count > 1 else { return }
-        let replacement: VaultCategory
-        if let other = categories.first(where: { $0.id != id && $0.name == "其他" }) { replacement = other }
-        else if let first = categories.first(where: { $0.id != id }) { replacement = first }
-        else { return }
-        for index in items.indices where items[index].categoryID == id {
-            items[index].categoryID = replacement.id
-            items[index].modifiedAt = .now
-        }
-        categories.removeAll { $0.id == id }
-        persist()
-    }
-
-    func moveCategory(_ sourceID: UUID, to targetID: UUID) {
-        guard sourceID != targetID,
-              let sourceIndex = categories.firstIndex(where: { $0.id == sourceID }),
-              let targetIndex = categories.firstIndex(where: { $0.id == targetID }) else { return }
-        let category = categories.remove(at: sourceIndex)
-        categories.insert(category, at: min(targetIndex, categories.count))
-        persist()
-    }
-
-    func addCustomIcons(_ icons: [CustomIcon]) -> Int {
-        var added = 0
-        for icon in icons {
-            guard customIcons.count < 100,
-                  !customIcons.contains(where: { $0.data == icon.data }) else { continue }
-            customIcons.append(icon)
-            added += 1
-        }
-        customIcons.sort { $0.addedAt > $1.addedAt }
-        if added > 0 { persist() }
-        return added
-    }
-
-    func deleteCustomIcon(_ id: UUID) {
-        customIcons.removeAll { $0.id == id }
-        persist()
-    }
-
-    var allTags: [String] { tags.sorted() }
-
-    func addTag(_ name: String) {
-        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty, !tags.contains(where: { $0.caseInsensitiveCompare(trimmed) == .orderedSame }) else { return }
-        tags.append(trimmed)
-        tags.sort()
-        persist()
-    }
-
-    func renameTag(_ old: String, to new: String) {
-        let trimmed = new.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
-        for index in items.indices where items[index].tags.contains(old) {
-            items[index].tags = Array(Set(items[index].tags.map { $0 == old ? trimmed : $0 })).sorted()
-            items[index].modifiedAt = .now
-        }
-        tags = Array(Set(tags.map { $0 == old ? trimmed : $0 })).sorted()
-        persist()
-    }
-
-    func deleteTag(_ tag: String) {
-        for index in items.indices { items[index].tags.removeAll { $0 == tag } }
-        tags.removeAll { $0 == tag }
-        persist()
-    }
-
-    func permanentlyDelete(_ id: UUID) {
-        items.removeAll { $0.id == id }
-        if selectedItemID == id { selectedItemID = nil }
-        persist()
-    }
-
-    func permanentlyDelete(_ ids: Set<UUID>) {
-        guard !ids.isEmpty else { return }
-        items.removeAll { ids.contains($0.id) }
-        if let selectedItemID, ids.contains(selectedItemID) { self.selectedItemID = nil }
-        persist()
-    }
-
-    var snapshot: VaultSnapshot { .init(categories: categories, items: items, tags: tags, customIcons: customIcons) }
-
-    func merge(_ snapshot: VaultSnapshot) {
-        let categoryMapping = mergeCategories(from: snapshot)
-        for imported in snapshot.items {
-            var remapped = imported
-            remapped.categoryID = categoryMapping[imported.categoryID] ?? imported.categoryID
-            _ = mergeItem(remapped)
-        }
-        finishMerge(snapshot)
-    }
-
+    func merge(_ snapshot: VaultSnapshot) { _ = core.merge(snapshot); touch() }
     func merge(_ snapshot: VaultSnapshot, progress: (Int, Int) -> Void) async -> (inserted: Int, updated: Int, skipped: Int, accounts: Int) {
-        let categoryMapping = mergeCategories(from: snapshot)
         let total = snapshot.items.count
-        var inserted = 0
-        var updated = 0
-        var skipped = 0
-        var importedAccounts = 0
         progress(0, total)
-        for (offset, imported) in snapshot.items.enumerated() {
-            var remapped = imported
-            remapped.categoryID = categoryMapping[imported.categoryID] ?? imported.categoryID
-            switch mergeItem(remapped) {
-            case .inserted:
-                inserted += 1
-                importedAccounts += remapped.accounts.count
-            case .updated:
-                updated += 1
-                importedAccounts += remapped.accounts.count
-            case .skipped:
-                skipped += 1
-            }
-            progress(offset + 1, total)
-            if offset.isMultiple(of: 4) {
-                try? await Task.sleep(for: .milliseconds(12))
-            } else {
-                await Task.yield()
-            }
-        }
-        finishMerge(snapshot)
-        return (inserted, updated, skipped, importedAccounts)
+        await Task.yield()
+        let result = core.merge(snapshot)
+        progress(total, total)
+        touch()
+        let accounts = snapshot.items.reduce(0) { $0 + $1.accounts.count }
+        return (result.inserted, result.updated, result.skipped, result.inserted + result.updated == 0 ? 0 : accounts)
     }
-
-    private func mergeCategories(from snapshot: VaultSnapshot) -> [UUID: UUID] {
-        var mapping: [UUID: UUID] = [:]
-        for category in snapshot.categories {
-            if let existing = categories.first(where: { $0.id == category.id }) {
-                mapping[category.id] = existing.id
-            } else if let existing = categories.first(where: {
-                $0.name.trimmingCharacters(in: .whitespacesAndNewlines)
-                    .caseInsensitiveCompare(category.name.trimmingCharacters(in: .whitespacesAndNewlines)) == .orderedSame
-            }) {
-                mapping[category.id] = existing.id
-            } else {
-                categories.append(category)
-                mapping[category.id] = category.id
-            }
-        }
-        return mapping
-    }
-
-    private enum MergeItemResult { case inserted, updated, skipped }
-
-    private func mergeItem(_ imported: VaultItem) -> MergeItemResult {
-        if let index = items.firstIndex(where: { $0.id == imported.id }) {
-            if imported.modifiedAt > items[index].modifiedAt {
-                items[index] = imported
-                return .updated
-            }
-            return .skipped
-        } else if items.contains(where: { semanticSignature(of: $0) == semanticSignature(of: imported) }) {
-            return .skipped
-        } else {
-            items.append(imported)
-            return .inserted
-        }
-    }
-
-    /// IDs generated while parsing Markdown and CSV are intentionally ignored here.
-    /// This makes importing the same external file idempotent without merging two
-    /// genuinely different account projects that merely share a display name.
-    private func semanticSignature(of item: VaultItem) -> String {
-        func folded(_ value: String) -> String {
-            value.trimmingCharacters(in: .whitespacesAndNewlines)
-                .folding(options: [.caseInsensitive, .widthInsensitive], locale: .current)
-        }
-        func exact(_ value: String) -> String { "\(value.utf8.count):\(value)" }
-        func fieldSignature(_ field: CustomField) -> String {
-            [folded(field.name), exact(field.value), field.isSecret ? "1" : "0"].joined(separator: "|")
-        }
-        func accountSignature(_ account: LoginAccount) -> String {
-            let fields = account.fields.map(fieldSignature).sorted().joined(separator: "¶")
-            return [exact(account.username), exact(account.password), fields].joined(separator: "§")
-        }
-
-        let accountSignatures = item.accounts.map(accountSignature).sorted().joined(separator: "¤")
-        let tags = item.tags.map(folded).sorted().joined(separator: "|")
-        let attachmentSignatures = (item.attachments ?? []).map {
-            "\(folded($0.filename)):\($0.data.base64EncodedString())"
-        }.sorted().joined(separator: "|")
-        return [
-            folded(item.name), item.categoryID.uuidString, exact(item.website), tags,
-            exact(item.note), folded(item.symbol), item.iconData?.base64EncodedString() ?? "",
-            attachmentSignatures, accountSignatures, item.deletedAt == nil ? "active" : "deleted"
-        ].joined(separator: "※")
-    }
-
-    private func finishMerge(_ snapshot: VaultSnapshot) {
-        tags = Array(Set(tags + (snapshot.tags ?? []) + snapshot.items.flatMap(\.tags))).sorted()
-        _ = mergeCustomIcons(snapshot.customIcons ?? [])
-        persist()
-    }
-
-    private func mergeCustomIcons(_ imported: [CustomIcon]) -> Int {
-        var added = 0
-        for icon in imported where customIcons.count < 100 {
-            guard !customIcons.contains(where: { $0.id == icon.id || $0.data == icon.data }) else { continue }
-            customIcons.append(icon)
-            added += 1
-        }
-        customIcons.sort { $0.addedAt > $1.addedAt }
-        return added
-    }
-
-    func purgeExpiredTrash() {
-        let cutoff = Date.now.addingTimeInterval(-30 * 24 * 60 * 60)
-        items.removeAll { item in
-            guard let deletedAt = item.deletedAt else { return false }
-            return deletedAt < cutoff
-        }
-        persist()
-    }
-
-    private func persist() {
-        do {
-            try repository.save(.init(categories: categories, items: items, tags: tags, customIcons: customIcons))
-            storageError = nil
-        } catch {
-            storageError = error.localizedDescription
-        }
-    }
+    func purgeExpiredTrash() { core.purgeExpiredTrash(); touch() }
 
     func appBecameInactive() {
         guard appLockEnabled else { return }
         autoLockTask?.cancel()
-        let delay = lockAfterMinutes
-        if delay == 0 {
-            showingLockScreen = true
-            return
-        }
+        if lockAfterMinutes == 0 { showingLockScreen = true; return }
         autoLockTask = Task { @MainActor [weak self] in
-            try? await Task.sleep(for: .seconds(delay * 60))
+            try? await Task.sleep(for: .seconds((self?.lockAfterMinutes ?? 5) * 60))
             guard !Task.isCancelled else { return }
             self?.showingLockScreen = true
         }
     }
+    func appBecameActive() { autoLockTask?.cancel() }
 
-    func appBecameActive() {
-        autoLockTask?.cancel()
-    }
-
+    private func touch() { contentRevision &+= 1; storageError = core.storageError }
 }

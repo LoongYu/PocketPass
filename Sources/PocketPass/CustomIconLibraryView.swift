@@ -1,4 +1,5 @@
 import AppKit
+import ImageIO
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -138,7 +139,8 @@ struct CustomIconLibraryView: View {
         }
     }
 
-    private static func normalizedIconData(_ data: Data) -> Data? {
+    static func normalizedIconData(_ data: Data) -> Data? {
+        guard safePixelDimensions(data) else { return nil }
         guard let image = NSImage(data: data), image.size.width > 0, image.size.height > 0 else { return nil }
         let maximum: CGFloat = 512
         let scale = min(1, maximum / max(image.size.width, image.size.height))
@@ -150,5 +152,13 @@ struct CustomIconLibraryView: View {
         output.unlockFocus()
         guard let tiff = output.tiffRepresentation, let bitmap = NSBitmapImageRep(data: tiff) else { return nil }
         return bitmap.representation(using: .png, properties: [:])
+    }
+
+    private static func safePixelDimensions(_ data: Data) -> Bool {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+              let width = properties[kCGImagePropertyPixelWidth] as? Int,
+              let height = properties[kCGImagePropertyPixelHeight] as? Int else { return false }
+        return width > 0 && height > 0 && width <= 8_192 && height <= 8_192 && width * height <= 40_000_000
     }
 }

@@ -2,8 +2,11 @@
 .build/
 dist/
 DerivedData/
+xcuserdata/
+PocketPassIOS/Preview/
 *.xcuserstate
 *.pocketdata
 *.pocketpass
 vault-local.key
 /*.png
+.swiftpm/

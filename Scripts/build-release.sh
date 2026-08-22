@@ -7,12 +7,12 @@ BUILD_DIR="$PROJECT_DIR/.build/release-package"
 DIST_DIR="$PROJECT_DIR/dist"
 APP_NAME="口袋密码"
 EXECUTABLE_NAME="PocketPass"
-APP_VERSION="1.1"
-BUILD_NUMBER="2"
+APP_VERSION="1.2"
+BUILD_NUMBER="3"
 APP_PATH="$BUILD_DIR/$APP_NAME.app"
-DMG_NAME="PocketPass-2026081502.dmg"
+DMG_NAME="PocketPass-2026082201.dmg"
 DMG_PATH="$DIST_DIR/$DMG_NAME"
-VOLUME_NAME="口袋密码 V1.1"
+VOLUME_NAME="口袋密码 V1.2"
 
 if [[ "$BUILD_DIR" != "$PROJECT_DIR/.build/release-package" || "$DIST_DIR" != "$PROJECT_DIR/dist" ]]; then
   echo "发布目录校验失败" >&2
@@ -22,18 +22,35 @@ fi
 rm -rf "$BUILD_DIR"
 mkdir -p "$APP_PATH/Contents/MacOS" "$APP_PATH/Contents/Resources" "$DIST_DIR"
 
-for arch in arm64 x86_64; do
-  xcrun swiftc \
-    -parse-as-library -O \
-    -target "$arch-apple-macosx26.0" \
-    "$PROJECT_DIR"/Sources/PocketPass/*.swift \
-    -o "$BUILD_DIR/$EXECUTABLE_NAME-$arch"
-done
+ARM64_SCRATCH="$PROJECT_DIR/.build/release-arm64"
+X86_64_SCRATCH="$PROJECT_DIR/.build/release-x86_64"
+
+swift build \
+  --package-path "$PROJECT_DIR" \
+  --scratch-path "$ARM64_SCRATCH" \
+  --configuration release \
+  --product "$EXECUTABLE_NAME" \
+  --triple arm64-apple-macosx26.0
+
+swift build \
+  --package-path "$PROJECT_DIR" \
+  --scratch-path "$X86_64_SCRATCH" \
+  --configuration release \
+  --product "$EXECUTABLE_NAME" \
+  --triple x86_64-apple-macosx26.0
+
+ARM64_BIN_DIR="$(swift build --package-path "$PROJECT_DIR" --scratch-path "$ARM64_SCRATCH" --configuration release --triple arm64-apple-macosx26.0 --show-bin-path)"
+X86_64_BIN_DIR="$(swift build --package-path "$PROJECT_DIR" --scratch-path "$X86_64_SCRATCH" --configuration release --triple x86_64-apple-macosx26.0 --show-bin-path)"
 
 lipo -create \
-  "$BUILD_DIR/$EXECUTABLE_NAME-arm64" \
-  "$BUILD_DIR/$EXECUTABLE_NAME-x86_64" \
+  "$ARM64_BIN_DIR/$EXECUTABLE_NAME" \
+  "$X86_64_BIN_DIR/$EXECUTABLE_NAME" \
   -output "$APP_PATH/Contents/MacOS/$EXECUTABLE_NAME"
+
+RESOURCE_BUNDLE="$ARM64_BIN_DIR/${EXECUTABLE_NAME}_${EXECUTABLE_NAME}.bundle"
+if [[ -d "$RESOURCE_BUNDLE" ]]; then
+  cp -R "$RESOURCE_BUNDLE" "$APP_PATH/Contents/Resources/"
+fi
 
 INFO_PLIST="$APP_PATH/Contents/Info.plist"
 plutil -create xml1 "$INFO_PLIST"

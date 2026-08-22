@@ -210,7 +210,7 @@
 "按需联网" = "Network Access on Demand";
 "只有在你主动搜索 App Store 图标或通过网址获取网站图标时发起网络请求。" = "Network requests are made only when you search App Store icons or fetch a website icon.";
 "尚未接入 iCloud" = "iCloud Not Connected";
-"当前 Demo 不上传密码库，iCloud 同步将在后续版本独立开发。" = "This version does not upload your vault. iCloud sync is planned for a future release.";
+"当前版本不会上传密码库；iCloud 同步将在具备开发条件后独立实现。" = "This version does not upload your vault. iCloud sync will be implemented separately when development prerequisites are available.";
 
 "导入数据" = "Import Data";
 "导出数据" = "Export Data";
@@ -234,6 +234,11 @@
 "正在导入…" = "Importing…";
 "正在导入账户数据" = "Importing account data";
 "请输入一致的6位以上备份密码" = "Enter matching backup passwords of at least 6 characters.";
+"当前版本暂未接入；账户数据仅保存在本机加密密码库中。" = "Not available in this version; account data remains in the encrypted local vault.";
+"规划中" = "Planned";
+"支持 .pocketpass、JSON、CSV 和 Markdown；重复账户会自动跳过。" = "Supports .pocketpass, JSON, CSV, and Markdown; duplicate accounts are skipped automatically.";
+".pocketpass 与 JSON 可完整保留图标；CSV 和 Markdown 为纯文本。" = ".pocketpass and JSON preserve icons; CSV and Markdown are text-only.";
+"适用于 macOS 26 的原生应用" = "Native app for macOS 26";
 
 "本地密码库错误" = "Local Vault Error";
 "发生未知错误" = "An unknown error occurred";

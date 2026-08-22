@@ -1,3 +1,4 @@
+#if canImport(AppKit)
 import AppKit
 
 @MainActor
@@ -39,3 +40,4 @@ enum AppMenuBranding {
         }
     }
 }
+#endif

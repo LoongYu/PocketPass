@@ -116,8 +116,8 @@ struct AddItemView: View {
             attachmentError = ""
             for url in urls.prefix(5 - attachments.count) {
                 let access = url.startAccessingSecurityScopedResource(); defer { if access { url.stopAccessingSecurityScopedResource() } }
-                guard let data = try? Data(contentsOf: url), data.count <= 5_000_000 else {
-                    attachmentError = "已跳过无法读取或超过5 MB的图片"; continue
+                guard let data = try? Data(contentsOf: url), data.count <= VaultStore.maximumAttachmentBytes else {
+                    attachmentError = "已跳过无法读取或超过 2 MB 的图片"; continue
                 }
                 attachments.append(.init(id: UUID(), filename: url.lastPathComponent, data: data))
             }

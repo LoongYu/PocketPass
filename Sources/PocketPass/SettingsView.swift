@@ -105,8 +105,8 @@ struct SettingsView: View {
                 SettingsStatusRow(
                     icon: "icloud.fill",
                     title: "iCloud 同步",
-                    subtitle: "首版暂不接入，当前数据仅保存在本机加密密码库中。",
-                    status: "暂未开放"
+                    subtitle: "当前版本暂未接入；账户数据仅保存在本机加密密码库中。",
+                    status: "规划中"
                 )
             }
         }
@@ -164,11 +164,11 @@ struct SettingsView: View {
     private var dataSection: some View {
         SettingsSectionView(title: "数据") {
             SettingsCard {
-                SettingsActionRow(icon: "square.and.arrow.down.fill", title: "导入数据", subtitle: "支持加密备份、JSON、CSV 和 Markdown 文件。") {
+                SettingsActionRow(icon: "square.and.arrow.down.fill", title: "导入数据", subtitle: "支持 .pocketpass、JSON、CSV 和 Markdown；重复账户会自动跳过。") {
                     showingImport = true
                 }
                 SettingsDivider()
-                SettingsActionRow(icon: "square.and.arrow.up.fill", title: "导出与本地加密备份", subtitle: "加密备份使用独立密码保护，也可导出 JSON、CSV 或 Markdown。") {
+                SettingsActionRow(icon: "square.and.arrow.up.fill", title: "导出与本地加密备份", subtitle: ".pocketpass 与 JSON 可完整保留图标；CSV 和 Markdown 为纯文本。") {
                     showingExport = true
                 }
             }
@@ -186,14 +186,14 @@ struct SettingsView: View {
                     showingPrivacy = true
                 }
                 SettingsDivider()
-                SettingsStatusRow(icon: "shippingbox.fill", title: "版本", subtitle: "macOS 26 原生 Demo", status: appVersion)
+                SettingsStatusRow(icon: "shippingbox.fill", title: "版本", subtitle: "适用于 macOS 26 的原生应用", status: appVersion)
             }
         }
     }
 
     private var appVersion: String {
-        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.1"
-        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "2"
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.2"
+        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "3"
         return "V\(version)(\(build))"
     }
 }
@@ -397,7 +397,7 @@ private struct PrivacyInfoView: View {
             PrivacyLine(icon: "lock.shield.fill", title: "本地加密", detail: "账户、密码、分类、标签和图片附件写入本机 AES-GCM 加密密码库。")
             PrivacyLine(icon: "key.slash.fill", title: "不读取钥匙串", detail: "口袋密码不会读取 macOS 钥匙串中的密码或机密信息。")
             PrivacyLine(icon: "network", title: "按需联网", detail: "只有在你主动搜索 App Store 图标或通过网址获取网站图标时发起网络请求。")
-            PrivacyLine(icon: "icloud.slash.fill", title: "尚未接入 iCloud", detail: "当前 Demo 不上传密码库，iCloud 同步将在后续版本独立开发。")
+            PrivacyLine(icon: "icloud.slash.fill", title: "尚未接入 iCloud", detail: "当前版本不会上传密码库；iCloud 同步将在具备开发条件后独立实现。")
             Spacer()
         }
         .padding(28)

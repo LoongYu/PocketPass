@@ -1,0 +1,161 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		100000000000000000000001 /* PocketPassIOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000001 /* PocketPassIOSApp.swift */; };
+		100000000000000000000002 /* IOSTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000002 /* IOSTheme.swift */; };
+		100000000000000000000003 /* IOSModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000003 /* IOSModels.swift */; };
+		100000000000000000000004 /* IOSRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000004 /* IOSRootView.swift */; };
+		100000000000000000000005 /* IOSAccountViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000005 /* IOSAccountViews.swift */; };
+		100000000000000000000006 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000006 /* Assets.xcassets */; };
+		100000000000000000000007 /* PocketLogoMark.png in Resources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000007 /* PocketLogoMark.png */; };
+		100000000000000000000008 /* VaultModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000010 /* VaultModels.swift */; };
+		100000000000000000000009 /* LocalVaultRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000011 /* LocalVaultRepository.swift */; };
+		10000000000000000000000A /* PasswordGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000012 /* PasswordGenerator.swift */; };
+		10000000000000000000000B /* RemoteIconService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000013 /* RemoteIconService.swift */; };
+		10000000000000000000000C /* VaultStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000014 /* VaultStore.swift */; };
+		10000000000000000000000D /* IOSAppLockService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000015 /* IOSAppLockService.swift */; };
+		10000000000000000000000E /* DataTransfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000016 /* DataTransfer.swift */; };
+		10000000000000000000000F /* IOSManagementViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000017 /* IOSManagementViews.swift */; };
+		100000000000000000000010 /* IOSIconPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000018 /* IOSIconPickerView.swift */; };
+		100000000000000000000011 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000019 /* Localizable.xcstrings */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		200000000000000000000001 /* PocketPassIOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PocketPassIOSApp.swift; sourceTree = "<group>"; };
+		200000000000000000000002 /* IOSTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSTheme.swift; sourceTree = "<group>"; };
+		200000000000000000000003 /* IOSModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSModels.swift; sourceTree = "<group>"; };
+		200000000000000000000004 /* IOSRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSRootView.swift; sourceTree = "<group>"; };
+		200000000000000000000005 /* IOSAccountViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSAccountViews.swift; sourceTree = "<group>"; };
+		200000000000000000000006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		200000000000000000000007 /* PocketLogoMark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PocketLogoMark.png; path = ../../Sources/PocketPass/Resources/PocketLogoMark.png; sourceTree = "<group>"; };
+		200000000000000000000008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		200000000000000000000009 /* 口袋密码.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "口袋密码.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		200000000000000000000010 /* VaultModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultModels.swift; sourceTree = "<group>"; };
+		200000000000000000000011 /* LocalVaultRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalVaultRepository.swift; sourceTree = "<group>"; };
+		200000000000000000000012 /* PasswordGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.swift; sourceTree = "<group>"; };
+		200000000000000000000013 /* RemoteIconService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteIconService.swift; sourceTree = "<group>"; };
+		200000000000000000000014 /* VaultStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultStore.swift; sourceTree = "<group>"; };
+		200000000000000000000015 /* IOSAppLockService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSAppLockService.swift; sourceTree = "<group>"; };
+		200000000000000000000016 /* DataTransfer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataTransfer.swift; sourceTree = "<group>"; };
+		200000000000000000000017 /* IOSManagementViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSManagementViews.swift; sourceTree = "<group>"; };
+		200000000000000000000018 /* IOSIconPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSIconPickerView.swift; sourceTree = "<group>"; };
+		200000000000000000000019 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		300000000000000000000001 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		400000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				400000000000000000000002 /* PocketPassIOS */,
+				400000000000000000000004 /* PocketPassCore */,
+				400000000000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		400000000000000000000002 /* PocketPassIOS */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000001 /* PocketPassIOSApp.swift */,
+				200000000000000000000002 /* IOSTheme.swift */,
+				200000000000000000000003 /* IOSModels.swift */,
+				200000000000000000000004 /* IOSRootView.swift */,
+				200000000000000000000005 /* IOSAccountViews.swift */,
+				200000000000000000000015 /* IOSAppLockService.swift */,
+				200000000000000000000017 /* IOSManagementViews.swift */,
+				200000000000000000000018 /* IOSIconPickerView.swift */,
+				200000000000000000000019 /* Localizable.xcstrings */,
+				200000000000000000000006 /* Assets.xcassets */,
+				200000000000000000000007 /* PocketLogoMark.png */,
+				200000000000000000000008 /* Info.plist */,
+			);
+			path = PocketPassIOS;
+			sourceTree = "<group>";
+		};
+		400000000000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (200000000000000000000009 /* 口袋密码.app */);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		400000000000000000000004 /* PocketPassCore */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000010 /* VaultModels.swift */,
+				200000000000000000000011 /* LocalVaultRepository.swift */,
+				200000000000000000000012 /* PasswordGenerator.swift */,
+				200000000000000000000013 /* RemoteIconService.swift */,
+				200000000000000000000014 /* VaultStore.swift */,
+				200000000000000000000016 /* DataTransfer.swift */,
+			);
+			name = PocketPassCore;
+			path = ../Sources/PocketPassCore;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		500000000000000000000001 /* PocketPassIOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 900000000000000000000002 /* Build configuration list for PBXNativeTarget "PocketPassIOS" */;
+			buildPhases = (
+				600000000000000000000001 /* Sources */,
+				300000000000000000000001 /* Frameworks */,
+				600000000000000000000002 /* Resources */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = PocketPassIOS;
+			productName = PocketPassIOS;
+			productReference = 200000000000000000000009 /* 口袋密码.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		700000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {BuildIndependentTargetsInParallel = 1; LastSwiftUpdateCheck = 2650; LastUpgradeCheck = 2650; TargetAttributes = {500000000000000000000001 = {CreatedOnToolsVersion = 26.5;};};};
+			buildConfigurationList = 900000000000000000000001 /* Build configuration list for PBXProject "PocketPassIOS" */;
+			compatibilityVersion = "Xcode 16.0";
+			developmentRegion = zh_CN;
+			hasScannedForEncodings = 0;
+			knownRegions = (Base, zh_CN, en);
+			mainGroup = 400000000000000000000001;
+			productRefGroup = 400000000000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (500000000000000000000001 /* PocketPassIOS */);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		600000000000000000000002 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000006 /* Assets.xcassets in Resources */, 100000000000000000000007 /* PocketLogoMark.png in Resources */, 100000000000000000000011 /* Localizable.xcstrings in Resources */); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		600000000000000000000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000001, 100000000000000000000002, 100000000000000000000003, 100000000000000000000004, 100000000000000000000005, 100000000000000000000008, 100000000000000000000009, 10000000000000000000000A, 10000000000000000000000B, 10000000000000000000000C, 10000000000000000000000D, 10000000000000000000000E, 10000000000000000000000F, 100000000000000000000010); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		800000000000000000000001 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; IPHONEOS_DEPLOYMENT_TARGET = 26.0; SDKROOT = iphoneos; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SWIFT_VERSION = 6.0;}; name = Debug; };
+		800000000000000000000002 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; IPHONEOS_DEPLOYMENT_TARGET = 26.0; SDKROOT = iphoneos; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SWIFT_VERSION = 6.0;}; name = Release; };
+		800000000000000000000003 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 3; DEVELOPMENT_TEAM = ""; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = PocketPassIOS/Info.plist; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks"; MARKETING_VERSION = 1.2; PRODUCT_BUNDLE_IDENTIFIER = com.loongyu.pocketpass.ios; PRODUCT_NAME = "口袋密码"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = "1,2";}; name = Debug; };
+		800000000000000000000004 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 3; DEVELOPMENT_TEAM = ""; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = PocketPassIOS/Info.plist; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks"; MARKETING_VERSION = 1.2; PRODUCT_BUNDLE_IDENTIFIER = com.loongyu.pocketpass.ios; PRODUCT_NAME = "口袋密码"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = "1,2";}; name = Release; };
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		900000000000000000000001 /* Build configuration list for PBXProject "PocketPassIOS" */ = {isa = XCConfigurationList; buildConfigurations = (800000000000000000000001, 800000000000000000000002); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		900000000000000000000002 /* Build configuration list for PBXNativeTarget "PocketPassIOS" */ = {isa = XCConfigurationList; buildConfigurations = (800000000000000000000003, 800000000000000000000004); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+	};
+	rootObject = 700000000000000000000001 /* Project object */;
+}

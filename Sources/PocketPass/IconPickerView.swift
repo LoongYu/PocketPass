@@ -82,10 +82,11 @@ struct IconPickerView: View {
             guard case .success(let url) = result else { return }
             let accessing = url.startAccessingSecurityScopedResource()
             defer { if accessing { url.stopAccessingSecurityScopedResource() } }
-            guard let data = try? Data(contentsOf: url), data.count <= 5_000_000 else {
-                errorMessage = store.appLanguage.text("图片无法读取或超过5 MB", "The image cannot be read or exceeds 5 MB"); return
+            guard let data = try? Data(contentsOf: url), data.count <= 20_000_000,
+                  let normalized = CustomIconLibraryView.normalizedIconData(data), normalized.count <= 2_000_000 else {
+                errorMessage = store.appLanguage.text("图片无法读取或处理后仍然过大", "The image cannot be read or remains too large after processing"); return
             }
-            selectedIcon = "photo.fill"; selectedIconData = data; dismiss()
+            selectedIcon = "photo.fill"; selectedIconData = normalized; dismiss()
         }
     }
 
@@ -275,7 +276,9 @@ struct IconPickerView: View {
         errorMessage = ""; isLoading = true
         Task {
             do {
-                selectedIconData = try await RemoteIconService.downloadImage(result.artworkUrl100)
+                let downloaded = try await RemoteIconService.downloadImage(result.artworkUrl100)
+                guard let normalized = CustomIconLibraryView.normalizedIconData(downloaded) else { throw URLError(.cannotDecodeContentData) }
+                selectedIconData = normalized
                 selectedIcon = "app.fill"
                 dismiss()
             } catch { errorMessage = store.appLanguage.text("图标下载失败", "Icon download failed"); isLoading = false }
@@ -286,7 +289,9 @@ struct IconPickerView: View {
         errorMessage = ""; isLoading = true
         Task {
             do {
-                selectedIconData = try await RemoteIconService.favicon(for: website)
+                let downloaded = try await RemoteIconService.favicon(for: website)
+                guard let normalized = CustomIconLibraryView.normalizedIconData(downloaded) else { throw URLError(.cannotDecodeContentData) }
+                selectedIconData = normalized
                 selectedIcon = "globe"
                 dismiss()
             } catch { errorMessage = store.appLanguage.text("未能获取该网站的图标", "Could not fetch an icon from this website"); isLoading = false }
