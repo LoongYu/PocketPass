@@ -34,7 +34,7 @@ struct EditItemView: View {
             if migratedAccounts.isEmpty {
                 migratedAccounts.append(.init(id: UUID(), username: "", password: "", fields: []))
             }
-            migratedAccounts[0].fields.append(
+            migratedAccounts[0].appendField(
                 .init(id: UUID(), name: "网址", value: legacyWebsite, isSecret: false)
             )
         }
@@ -65,7 +65,7 @@ struct EditItemView: View {
                                 VaultIconView(symbol: symbol, data: iconData, size: 52, cornerRadius: 15)
                                 Text("图标选择").font(.caption).foregroundStyle(PocketTheme.muted)
                             }.frame(maxWidth: .infinity).padding(8)
-                        }.buttonStyle(.plain).background(PocketTheme.card).clipShape(RoundedRectangle(cornerRadius: 18))
+                        }.buttonStyle(.plain).background(PocketTheme.background).clipShape(RoundedRectangle(cornerRadius: 18))
                         FormCard {
                             PlainInputRow {
                                 TextField("名称", text: $name)
@@ -91,7 +91,7 @@ struct EditItemView: View {
                         }
                         AttachmentStrip(attachments: $attachments)
                         Button { showingImageImporter = true } label: {
-                            Text("添加图片").frame(maxWidth: .infinity)
+                            Label("添加图片", systemImage: "photo.badge.plus").frame(maxWidth: .infinity)
                         }.buttonStyle(.plain).padding(10).background(PocketTheme.card).clipShape(Capsule()).disabled(attachments.count >= 5)
                     }.frame(maxWidth: .infinity)
                     VStack(spacing: 10) {
@@ -102,7 +102,7 @@ struct EditItemView: View {
                         }
                         Button {
                             accounts.append(.init(id: UUID(), username: "", password: "", fields: []))
-                        } label: { Text("添加账号").frame(maxWidth: .infinity) }
+                        } label: { Label("添加账号", systemImage: "person.badge.plus").frame(maxWidth: .infinity) }
                             .buttonStyle(.plain).padding(10).background(PocketTheme.card).clipShape(Capsule())
                     }.frame(maxWidth: .infinity)
                 }.padding(16)

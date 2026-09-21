@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 @main
@@ -11,9 +12,12 @@ struct PocketPassApp: App {
                 .environment(store)
                 .environment(\.locale, store.appLanguage.locale)
                 .frame(minWidth: 1080, minHeight: 680)
-                .preferredColorScheme(store.appearanceMode.colorScheme)
                 .onAppear {
+                    applyAppearance(store.appearanceMode)
                     AppMenuBranding.apply(language: store.appLanguage)
+                }
+                .onChange(of: store.appearanceMode) { _, appearance in
+                    applyAppearance(appearance)
                 }
                 .onChange(of: store.appLanguage) { _, language in
                     AppMenuBranding.apply(language: language)
@@ -25,5 +29,13 @@ struct PocketPassApp: App {
         }
         .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 1280, height: 800)
+    }
+
+    private func applyAppearance(_ mode: AppearanceMode) {
+        NSApp.appearance = switch mode {
+        case .dark: NSAppearance(named: .darkAqua)
+        case .light: NSAppearance(named: .aqua)
+        case .system: nil
+        }
     }
 }

@@ -181,13 +181,6 @@ struct IOSHomeView: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Button { settings.lockNow() } label: {
-                Image(systemName: "lock.open.fill")
-                    .font(.system(size: 17, weight: .semibold))
-                    .frame(width: 42, height: 42)
-                    .background(IOSTheme.panel, in: Circle())
-            }
-            .buttonStyle(.plain)
         }
         .padding(.top, 10)
     }
@@ -247,7 +240,7 @@ struct IOSHomeView: View {
             }
             HStack(spacing: 10) {
                 summaryMetric(value: store.activeItems().count, title: "账户", icon: "key.fill")
-                summaryMetric(value: store.categories.count, title: "分类", icon: "folder.fill")
+                summaryMetric(value: store.categories.count, title: "分类", icon: "square.grid.2x2.fill")
             }
         }
         .padding(18)
@@ -341,7 +334,7 @@ struct IOSHomeView: View {
                             IOSVaultIcon(symbol: item.symbol, data: item.iconData, size: 52, background: IOSTheme.accent)
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(item.name).font(.headline)
-                                Text(item.accounts.first?.username ?? "")
+                                Text(item.accounts.first?.summaryValue ?? "")
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                                     .lineLimit(1)
@@ -442,7 +435,7 @@ struct IOSCategoryAccountsView: View {
                     IOSVaultIcon(symbol: item.symbol, data: item.iconData, size: 44, background: Color(hex: category.colorHex))
                     VStack(alignment: .leading) {
                         Text(item.name).font(.headline)
-                        Text(item.accounts.first?.username ?? "").font(.caption).foregroundStyle(.secondary)
+                        Text(item.accounts.first?.summaryValue ?? "").font(.caption).foregroundStyle(.secondary)
                     }
                 }
             }
@@ -530,7 +523,7 @@ struct IOSSettingsView: View {
                 Section("内容") {
                     NavigationLink(destination: IOSTagManagerView()) { Label("标签管理", systemImage: "tag.fill") }
                     NavigationLink(destination: IOSIconLibraryView()) { Label("图标库", systemImage: "photo.on.rectangle.angled") }
-                    NavigationLink(destination: IOSCategoryManagerView()) { Label("分类管理", systemImage: "folder.fill") }
+                    NavigationLink(destination: IOSCategoryManagerView()) { Label("分类管理", systemImage: "square.grid.2x2.fill") }
                 }
                 Section {
                     NavigationLink(destination: IOSDataManagementView(mode: .importData)) { Label("导入数据", systemImage: "square.and.arrow.down") }

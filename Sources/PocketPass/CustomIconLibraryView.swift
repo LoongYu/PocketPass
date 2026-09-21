@@ -17,7 +17,7 @@ struct CustomIconLibraryView: View {
                 Text("图标库").font(.title3.bold())
                 Spacer()
                 Button("完成") { dismiss() }.buttonStyle(.borderedProminent)
-                    .tint(PocketTheme.accent).foregroundStyle(.white)
+                    .tint(PocketTheme.accent).foregroundStyle(PocketTheme.primaryButtonText)
             }
             .padding(.horizontal, 22).padding(.vertical, 18)
 
@@ -33,7 +33,7 @@ struct CustomIconLibraryView: View {
                 Button { showingImporter = true } label: {
                     Label("上传图片", systemImage: "plus")
                 }
-                .buttonStyle(.borderedProminent).tint(PocketTheme.accent).foregroundStyle(.white)
+                .buttonStyle(.borderedProminent).tint(PocketTheme.accent).foregroundStyle(PocketTheme.primaryButtonText)
                 .disabled(store.customIcons.count >= 100)
             }
             .padding(.horizontal, 22).padding(.bottom, 14)

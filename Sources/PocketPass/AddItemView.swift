@@ -1,5 +1,4 @@
 import SwiftUI
-import UniformTypeIdentifiers
 
 struct AddItemView: View {
     @Environment(VaultStore.self) private var store
@@ -42,7 +41,7 @@ struct AddItemView: View {
                                 Text("图标选择").font(.caption).foregroundStyle(PocketTheme.muted)
                             }.frame(maxWidth: .infinity).padding(.vertical, 8)
                         }.buttonStyle(.plain)
-                            .background(PocketTheme.card).clipShape(RoundedRectangle(cornerRadius: 18))
+                            .background(PocketTheme.background).clipShape(RoundedRectangle(cornerRadius: 18))
 
                         FormCard {
                             PlainInputRow {
@@ -74,7 +73,7 @@ struct AddItemView: View {
                             AttachmentStrip(attachments: $attachments)
                         }
                         Button { showingImageImporter = true } label: {
-                            Text("添加图片").frame(maxWidth: .infinity)
+                            Label("添加图片", systemImage: "photo.badge.plus").frame(maxWidth: .infinity)
                         }.buttonStyle(.plain).padding(10).background(PocketTheme.card)
                             .clipShape(Capsule()).disabled(attachments.count >= 5)
                         if !attachmentError.isEmpty { Text(attachmentError).font(.caption).foregroundStyle(.red) }
@@ -92,7 +91,7 @@ struct AddItemView: View {
                         Button {
                             accounts.append(.init(id: UUID(), username: "", password: "", fields: []))
                         } label: {
-                            Text("添加账号")
+                            Label("添加账号", systemImage: "person.badge.plus")
                                 .frame(maxWidth: .infinity)
                         }.buttonStyle(.plain).padding(10).background(PocketTheme.card)
                             .clipShape(Capsule())
@@ -162,6 +161,9 @@ struct LoginAccountEditor: View {
     @State private var revealPassword = false
     @State private var showingFieldPicker = false
     @State private var showingPasswordGenerator = false
+    @State private var draggedFieldID: UUID?
+    @State private var dragOffsetY: CGFloat = 0
+    @State private var processedDragSteps = 0
 
     var body: some View {
         FormCard {
@@ -175,31 +177,58 @@ struct LoginAccountEditor: View {
                     }.buttonStyle(.plain)
                 }
             }
-            PlainInputRow {
-                TextField("用户名 / 手机号", text: $account.username)
-            }
-            PlainInputRow {
-                HStack {
-                    Group {
-                        if revealPassword { TextField("密码", text: $account.password) }
-                        else { SecureField("密码", text: $account.password) }
-                    }.textFieldStyle(.plain)
-                    Button { revealPassword.toggle() } label: {
-                        Image(systemName: revealPassword ? "eye.slash" : "eye")
-                            .frame(width: 28, height: 24).background(PocketTheme.controlFill).clipShape(Capsule())
-                    }.buttonStyle(.plain)
-                    Button { showingPasswordGenerator = true } label: {
-                        Image(systemName: "die.face.5.fill")
-                            .frame(width: 28, height: 24).background(PocketTheme.controlFill).clipShape(Capsule())
+            VStack(spacing: 8) {
+            ForEach(account.orderedFieldIDs, id: \.self) { fieldID in
+                Group {
+                if fieldID == account.usernameFieldID {
+                    PlainInputRow {
+                        HStack(spacing: 8) {
+                            TextField("用户名 / 手机号", text: $account.username)
+                            MacFieldDragHandle(
+                                onChanged: { updateDrag(fieldID, translation: $0) },
+                                onEnded: endDrag
+                            )
+                        }
                     }
-                    .buttonStyle(.plain)
-                    .help("生成密码")
+                    .contextMenu { Button("删除字段", role: .destructive) { account.removeField(fieldID) } }
+                } else if fieldID == account.passwordFieldID {
+                    PlainInputRow {
+                        HStack(spacing: 8) {
+                            Group {
+                                if revealPassword { TextField("密码", text: $account.password) }
+                                else { SecureField("密码", text: $account.password) }
+                            }.textFieldStyle(.plain)
+                            Button { revealPassword.toggle() } label: {
+                                Image(systemName: revealPassword ? "eye.slash" : "eye")
+                                    .frame(width: 28, height: 24).background(PocketTheme.controlFill).clipShape(Capsule())
+                            }.buttonStyle(.plain)
+                            Button { showingPasswordGenerator = true } label: {
+                                Image(systemName: "die.face.5.fill")
+                                    .frame(width: 28, height: 24).background(PocketTheme.controlFill).clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
+                            .help("生成密码")
+                            MacFieldDragHandle(
+                                onChanged: { updateDrag(fieldID, translation: $0) },
+                                onEnded: endDrag
+                            )
+                        }
+                    }
+                    .contextMenu { Button("删除字段", role: .destructive) { account.removeField(fieldID) } }
+                } else if let fieldIndex = account.fields.firstIndex(where: { $0.id == fieldID }) {
+                    CustomFieldInputRow(
+                        field: $account.fields[fieldIndex],
+                        dragChanged: { updateDrag(fieldID, translation: $0) },
+                        dragEnded: endDrag
+                    ) {
+                        account.removeField(fieldID)
+                    }
                 }
+                }
+                .contentShape(RoundedRectangle(cornerRadius: 14))
+                .offset(y: draggedFieldID == fieldID ? dragOffsetY : 0)
+                .zIndex(draggedFieldID == fieldID ? 1 : 0)
             }
-            ForEach($account.fields) { $field in
-                CustomFieldInputRow(field: $field) {
-                    account.fields.removeAll { $0.id == field.id }
-                }
             }
             Button {
                 showingFieldPicker = true
@@ -210,7 +239,13 @@ struct LoginAccountEditor: View {
         }
         .sheet(isPresented: $showingFieldPicker) {
             AddFieldPickerView { name, isSecret in
-                account.fields.append(.init(id: UUID(), name: name, value: "", isSecret: isSecret))
+                if name == "账户", !account.hasUsernameField {
+                    account.addUsernameField()
+                } else if name == "密码", !account.hasPasswordField {
+                    account.addPasswordField()
+                } else {
+                    account.appendField(.init(id: UUID(), name: name, value: "", isSecret: isSecret))
+                }
             }
         }
         .sheet(isPresented: $showingPasswordGenerator) {
@@ -220,10 +255,46 @@ struct LoginAccountEditor: View {
             }
         }
     }
+
+    private func updateDrag(_ fieldID: UUID, translation: CGFloat) {
+        if draggedFieldID == nil {
+            draggedFieldID = fieldID
+            processedDragSteps = 0
+        }
+        guard draggedFieldID == fieldID else { return }
+
+        let requestedSteps = Int(translation / 48)
+        let delta = requestedSteps - processedDragSteps
+        var order = account.orderedFieldIDs
+        if delta != 0, let source = order.firstIndex(of: fieldID) {
+            let target = min(max(source + delta, 0), order.count - 1)
+            let actualDelta = target - source
+            if actualDelta != 0 {
+                order.move(
+                    fromOffsets: IndexSet(integer: source),
+                    toOffset: target > source ? target + 1 : target
+                )
+                processedDragSteps += actualDelta
+                withAnimation(.snappy(duration: 0.16)) { account.fieldOrder = order }
+            }
+        }
+
+        let remainder = translation - CGFloat(processedDragSteps) * 48
+        dragOffsetY = min(max(remainder, -24), 24)
+    }
+
+    private func endDrag() {
+        withAnimation(.snappy(duration: 0.14)) { dragOffsetY = 0 }
+        draggedFieldID = nil
+        processedDragSteps = 0
+    }
+
 }
 
 private struct CustomFieldInputRow: View {
     @Binding var field: CustomField
+    let dragChanged: (CGFloat) -> Void
+    let dragEnded: () -> Void
     let onDelete: () -> Void
     @State private var revealSecret = false
     @State private var showingRename = false
@@ -252,16 +323,8 @@ private struct CustomFieldInputRow: View {
                     .help(revealSecret ? "隐藏" : "显示")
                 }
 
-                Button(role: .destructive, action: onDelete) {
-                    Image(systemName: "minus.circle.fill")
-                        .font(.body)
-                        .frame(width: 28, height: 24)
-                        .background(.red.opacity(0.1))
-                        .clipShape(Capsule())
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(.red)
-                .help("删除字段")
+                MacFieldDragHandle(onChanged: dragChanged, onEnded: dragEnded)
+
             }
         }
         .contentShape(Rectangle())
@@ -294,7 +357,7 @@ struct FormCard<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) { content }
             .padding(10).frame(maxWidth: .infinity, alignment: .leading)
-            .background(PocketTheme.card).clipShape(RoundedRectangle(cornerRadius: 18))
+            .background(Color.clear)
     }
 }
 
@@ -305,8 +368,9 @@ struct PlainInputRow<Content: View>: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .textFieldStyle(.plain)
             .padding(.horizontal, 14).padding(.vertical, 10)
-            .background(PocketTheme.input)
-            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .background(PocketTheme.panel)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(PocketTheme.border, lineWidth: 1))
     }
 }
 
@@ -351,22 +415,40 @@ struct CategoryDropdown: View {
     }
 }
 
+private struct MacFieldDragHandle: View {
+    let onChanged: (CGFloat) -> Void
+    let onEnded: () -> Void
+
+    var body: some View {
+        Image(systemName: "line.3.horizontal")
+            .font(.body.weight(.semibold))
+            .foregroundStyle(PocketTheme.muted)
+            .frame(width: 30, height: 26)
+            .background(PocketTheme.controlFill)
+            .clipShape(Capsule())
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 2, coordinateSpace: .local)
+                    .onChanged { onChanged($0.translation.height) }
+                    .onEnded { _ in onEnded() }
+            )
+            .help("拖动调整字段顺序")
+    }
+}
+
 struct NoteInputRow: View {
     @Binding var text: String
     let placeholder: String
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            if text.isEmpty {
-                Text(LocalizedStringKey(placeholder)).foregroundStyle(PocketTheme.muted).padding(.top, 3)
-            }
-            TextEditor(text: $text)
-                .scrollContentBackground(.hidden)
-                .font(.body)
-                .frame(height: 84)
-        }
+        TextField(LocalizedStringKey(placeholder), text: $text, axis: .vertical)
+            .textFieldStyle(.plain)
+            .font(.body)
+            .lineLimit(3...8)
+            .frame(minHeight: 84, alignment: .topLeading)
         .padding(.horizontal, 14).padding(.vertical, 9)
-        .background(PocketTheme.input)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .background(PocketTheme.panel)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(PocketTheme.border, lineWidth: 1))
     }
 }

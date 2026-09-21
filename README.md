@@ -6,7 +6,7 @@
 
 <p align="center">本地优先、原生 SwiftUI 实现的 macOS 账户密码管理器。</p>
 
-> 当前版本：**V1.2(3)**<br>
+> 当前版本：**V1.2(4)**<br>
 > 系统要求：**macOS 26 或更高版本**<br>
 > 支持架构：**Apple Silicon 与 Intel（Universal Binary）**
 
@@ -47,7 +47,7 @@ PocketPass（中文品牌名“口袋密码”）用于在 Mac 本地集中整�
 
 ### 本地优先
 
-V1.2(3) 不接入云端服务。密码库保存在当前用户的：
+V1.2(4) 不接入云端服务。密码库保存在当前用户的：
 
 ```text
 ~/Library/Application Support/口袋密码/
@@ -65,7 +65,7 @@ V1.2(3) 不接入云端服务。密码库保存在当前用户的：
 
 ## 下载与安装
 
-1. 在 [Releases](https://github.com/LoongYu/PocketPass/releases) 下载 `PocketPass-2026082201.dmg`。
+1. 在 [Releases](https://github.com/LoongYu/PocketPass/releases) 下载最新 macOS DMG，或下载未签名的 iOS/iPadOS IPA。
 2. 打开 DMG，将“口袋密码”拖入 **Applications** 文件夹。
 3. 从“应用程序”目录启动口袋密码。
 
@@ -95,13 +95,13 @@ swift run PocketPass
 生成文件位于：
 
 ```text
-dist/PocketPass-2026082201.dmg
+dist/PocketPass-V1.2(4)-20260921.dmg
 ```
 
 ## 隐私与安全说明
 
 - 应用不会主动读取 macOS 钥匙串中的任何信息。
-- V1.2(3) 不上传密码库，也不包含分析、广告或跟踪 SDK。
+- V1.2(4) 不上传密码库，也不包含分析、广告或跟踪 SDK。
 - 应用锁用于阻止他人在应用界面中查看数据，不代替磁盘加密或 macOS 用户账户安全。
 - 设备损坏或应用数据目录丢失可能造成数据无法恢复，请定期创建 `.pocketpass` 加密备份。
 - 本项目尚未接受独立安全审计，不建议在未评估风险的情况下用于高价值生产凭据。
@@ -127,12 +127,16 @@ dist/PocketPass-2026082201.dmg
 - 系统密码自动填充与登录后保存。
 - 跨设备共享、紧急访问及更细粒度的安全策略。
 
+## iOS / iPadOS 本地安装
+
+仓库包含 Universal iOS target，可在 Xcode 中选择 iPhone 或 iPad 真机运行。Release 页面提供未签名 IPA，使用者需要使用自己的 Apple ID 或开发者证书签名；未签名 IPA 不能直接安装。当前 iOS/iPadOS 版本同样只在本地保存数据，不接入 iCloud。
+
 ## 当前暂不包含
 
 - iCloud 同步。
-- 可安装发布的 iOS / iPadOS 客户端（当前代码库已包含开发中的 Universal iOS target）。
+- App Store / TestFlight 发布的 iOS / iPadOS 客户端（当前提供 Universal iOS target 和未签名 IPA）。
 - 浏览器扩展及网页自动填充。
 
-## 使用范围
+## 开源许可
 
-本仓库为个人私有项目，仅供仓库所有者个人使用。未经授权，不得公开、复制、修改或再分发项目源代码及发布文件。
+本项目以 MIT License 发布，详见 [LICENSE](LICENSE)。密码管理器涉及敏感数据，使用前请自行评估安全风险并保留加密备份。

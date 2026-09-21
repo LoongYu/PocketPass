@@ -66,6 +66,8 @@ private struct RailView: View {
                         .background(store.selectedSection == section ? PocketTheme.accent : .clear)
                         .foregroundStyle(store.selectedSection == section ? .black : PocketTheme.muted)
                         .clipShape(Capsule())
+                        .frame(width: 58, height: 58)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .help(section.title)
@@ -79,6 +81,8 @@ private struct RailView: View {
                     .background(PocketTheme.accent)
                     .foregroundStyle(.black)
                     .clipShape(Capsule())
+                    .frame(width: 60, height: 60)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .help("添加账户")
@@ -386,6 +390,10 @@ private struct AccountRow: View {
     var isSelecting = false
     var isSelected = false
     var selectionAction: () -> Void = {}
+    private var summary: String {
+        let value = item.accounts.first?.summaryValue ?? ""
+        return value.isEmpty ? "自定义信息" : value
+    }
     var body: some View {
         Button {
             if isSelecting { selectionAction() }
@@ -401,7 +409,7 @@ private struct AccountRow: View {
                 VaultIconView(symbol: item.symbol, data: item.iconData)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(item.name).font(.headline)
-                    Text(item.accounts.first?.username ?? "未填写账号").font(.caption).foregroundStyle(PocketTheme.muted)
+                    Text(summary).font(.caption).foregroundStyle(PocketTheme.muted)
                 }
                 Spacer()
                 if item.isFavorite { Image(systemName: "bookmark.fill").foregroundStyle(PocketTheme.accent) }
@@ -438,12 +446,20 @@ private struct SummaryCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("总览").font(.headline)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("总览").font(.headline)
+                    Text("安全保存，随时取用")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
                 Spacer()
                 Button { showingPasswordGenerator = true } label: {
                     Label("生成密码", systemImage: "wand.and.stars")
-                        .font(.caption.bold()).padding(.horizontal, 10).padding(.vertical, 7)
-                        .background(PocketTheme.inset).clipShape(Capsule())
+                        .font(.caption.bold())
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 13)
+                        .padding(.vertical, 9)
+                        .background(PocketTheme.accent, in: Capsule())
                 }
                 .buttonStyle(.plain)
             }
@@ -452,9 +468,15 @@ private struct SummaryCard: View {
                 Stat(icon: "square.grid.2x2.fill", value: "\(store.categories.count)", title: "分类")
             }
         }
-        .padding(20)
-        .background(LinearGradient(colors: [PocketTheme.accent.opacity(0.52), PocketTheme.accentDeep.opacity(0.20)], startPoint: .topLeading, endPoint: .bottomTrailing))
-        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .padding(18)
+        .background(
+            LinearGradient(
+                colors: [PocketTheme.accentDeep.opacity(0.94), PocketTheme.accent.opacity(0.45)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
         .sheet(isPresented: $showingPasswordGenerator) { PasswordGeneratorView() }
     }
 }
@@ -462,8 +484,15 @@ private struct SummaryCard: View {
 private struct Stat: View {
     let icon: String; let value: String; let title: String
     var body: some View {
-        HStack { Image(systemName: icon).foregroundStyle(PocketTheme.accent); Text(value).bold(); Text(LocalizedStringKey(title)).foregroundStyle(PocketTheme.muted) }
-            .frame(maxWidth: .infinity).padding(12).background(PocketTheme.inset).clipShape(RoundedRectangle(cornerRadius: 13))
+        HStack(spacing: 10) {
+            Image(systemName: icon).foregroundStyle(PocketTheme.accent)
+            Text(value).font(.headline.bold())
+            Text(LocalizedStringKey(title)).font(.subheadline).foregroundStyle(.secondary)
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(14)
+        .background(Color.black.opacity(0.22), in: RoundedRectangle(cornerRadius: 17, style: .continuous))
     }
 }
 
@@ -471,6 +500,7 @@ private struct ItemDetail: View {
     @Environment(VaultStore.self) private var store
     let item: VaultItem
     @State private var revealPassword = false
+    @State private var revealedSecretFieldIDs: Set<UUID> = []
     @State private var showingEdit = false
     @State private var confirmingTrash = false
     @State private var confirmingPermanentDelete = false
@@ -532,33 +562,46 @@ private struct ItemDetail: View {
                 }
 
                 ForEach(Array(item.accounts.enumerated()), id: \.element.id) { index, account in
-                    Text(item.accounts.count > 1 ? "账户 \(index + 1)" : "账户")
+                    Text(account.hasUsernameField || account.hasPasswordField
+                         ? (item.accounts.count > 1 ? "账户 \(index + 1)" : "账户")
+                         : (item.accounts.count > 1 ? "信息 \(index + 1)" : "信息"))
                         .font(.callout.weight(.semibold)).foregroundStyle(PocketTheme.muted)
                         .padding(.top, 4)
                     VStack(spacing: 12) {
-                        DetailField(
-                            label: "用户名",
-                            value: account.username,
-                            secret: false,
-                            reveal: true,
-                            onCopy: showCopyNotice
-                        )
-                        DetailField(
-                            label: "密码",
-                            value: account.password,
-                            secret: true,
-                            reveal: revealPassword,
-                            toggleReveal: { revealPassword.toggle() },
-                            onCopy: showCopyNotice
-                        )
-                        ForEach(account.fields) { field in
-                            DetailField(
-                                label: field.name,
-                                value: field.value,
-                                secret: field.isSecret,
-                                reveal: !field.isSecret,
-                                onCopy: showCopyNotice
-                            )
+                        ForEach(account.orderedFieldIDs, id: \.self) { fieldID in
+                            if fieldID == account.usernameFieldID {
+                                DetailField(
+                                    label: "用户名",
+                                    value: account.username,
+                                    secret: false,
+                                    reveal: true,
+                                    onCopy: showCopyNotice
+                                )
+                            } else if fieldID == account.passwordFieldID {
+                                DetailField(
+                                    label: "密码",
+                                    value: account.password,
+                                    secret: true,
+                                    reveal: revealPassword,
+                                    toggleReveal: { revealPassword.toggle() },
+                                    onCopy: showCopyNotice
+                                )
+                            } else if let field = account.fields.first(where: { $0.id == fieldID }) {
+                                DetailField(
+                                    label: field.name,
+                                    value: field.value,
+                                    secret: field.isSecret,
+                                    reveal: !field.isSecret || revealedSecretFieldIDs.contains(field.id),
+                                    toggleReveal: {
+                                        if revealedSecretFieldIDs.contains(field.id) {
+                                            revealedSecretFieldIDs.remove(field.id)
+                                        } else {
+                                            revealedSecretFieldIDs.insert(field.id)
+                                        }
+                                    },
+                                    onCopy: showCopyNotice
+                                )
+                            }
                         }
                     }
                 }

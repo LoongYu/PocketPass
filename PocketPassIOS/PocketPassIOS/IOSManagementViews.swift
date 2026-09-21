@@ -1,5 +1,6 @@
 import PhotosUI
 import SwiftUI
+import UIKit
 import UniformTypeIdentifiers
 
 struct IOSTagManagerView: View {
@@ -111,6 +112,10 @@ struct IOSCategoryEditorView: View {
     @State private var colorHex: String
     @State private var showIconPicker = false
 
+    private var canSave: Bool {
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     private let colors = ["FDBF02", "F45B5B", "5792E8", "8B6FD6", "4DBB8A", "E45D9B", "51B6C8", "B6824C", "596BCB", "55C8B2", "EABC32", "888888"]
 
     init(category: VaultCategory?) {
@@ -159,20 +164,15 @@ struct IOSCategoryEditorView: View {
                     }
                 }
             }
-            .navigationTitle(Text(LocalizedStringKey(category == nil ? "添加分类" : "编辑分类")))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("取消") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") { save() }
-                        .fontWeight(.bold)
-                        .foregroundStyle(.black)
-                        .padding(.horizontal, 13)
-                        .padding(.vertical, 8)
-                        .background(IOSTheme.accent, in: Capsule())
-                        .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                IOSModalHeader(
+                    title: LocalizedStringKey(category == nil ? "添加分类" : "编辑分类"),
+                    canSave: canSave,
+                    cancel: { dismiss() },
+                    save: save
+                )
             }
+            .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $showIconPicker) {
                 IOSIconPickerView(symbol: $symbol, iconData: $iconData)
             }
@@ -260,14 +260,77 @@ enum IOSExportFormat: String, CaseIterable, Identifiable {
     var fileExtension: String {
         switch self { case .encrypted: "pocketpass"; case .json: "json"; case .csv: "csv"; case .markdown: "md" }
     }
+    var contentType: UTType {
+        switch self {
+        case .encrypted: .pocketPassBackup
+        case .json: .json
+        case .csv: .commaSeparatedText
+        case .markdown: .plainText
+        }
+    }
+}
+
+extension UTType {
+    static let pocketPassBackup = UTType(exportedAs: "com.loongyu.pocketpass.backup", conformingTo: .data)
+    static let legacyPocketPassBackup = UTType(importedAs: "com.loongyu.pockit.backup", conformingTo: .data)
 }
 
 struct IOSVaultDocument: FileDocument {
-    static var readableContentTypes: [UTType] { [.data, .json, .commaSeparatedText, .plainText] }
+    static var readableContentTypes: [UTType] {
+        [.pocketPassBackup, .legacyPocketPassBackup, .data, .json, .commaSeparatedText, .plainText]
+    }
     var data: Data
     init(data: Data = Data()) { self.data = data }
     init(configuration: ReadConfiguration) throws { data = configuration.file.regularFileContents ?? Data() }
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper { FileWrapper(regularFileWithContents: data) }
+}
+
+/// Uses import-as-copy so iCloud Drive finishes downloading the selected file
+/// before handing a local URL back to PocketPass. This avoids provider URLs
+/// whose security-scoped access can disappear with SwiftUI's file importer.
+private struct IOSBackupDocumentPicker: UIViewControllerRepresentable {
+    let onPick: (URL) -> Void
+    let onCancel: () -> Void
+
+    func makeCoordinator() -> Coordinator { Coordinator(parent: self) }
+
+    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
+        let picker = UIDocumentPickerViewController(
+            forOpeningContentTypes: [.pocketPassBackup, .json],
+            asCopy: true
+        )
+        picker.delegate = context.coordinator
+        picker.allowsMultipleSelection = false
+        picker.shouldShowFileExtensions = true
+#if targetEnvironment(simulator)
+        if ProcessInfo.processInfo.environment["POCKETPASS_UI_TEST_BACKUP_BASE64"] != nil {
+            picker.directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        }
+#endif
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
+
+    final class Coordinator: NSObject, UIDocumentPickerDelegate {
+        let parent: IOSBackupDocumentPicker
+
+        init(parent: IOSBackupDocumentPicker) {
+            self.parent = parent
+        }
+
+        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+            guard let url = urls.first else {
+                parent.onCancel()
+                return
+            }
+            parent.onPick(url)
+        }
+
+        func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+            parent.onCancel()
+        }
+    }
 }
 
 struct IOSDataManagementView: View {
@@ -284,6 +347,10 @@ struct IOSDataManagementView: View {
     @State private var isWorking = false
     @State private var progress = 0.0
     @State private var resultMessage: String?
+    @State private var selectedImportFilename: String?
+    @State private var pendingImportData: Data?
+    @State private var pendingImportExtension = ""
+    @State private var showImportPasswordPrompt = false
 
     var body: some View {
         Form {
@@ -307,10 +374,20 @@ struct IOSDataManagementView: View {
                 }
             } else {
                 Section {
-                    Label("支持 .pocketpass、.json、.csv 和 .md；重复数据会自动跳过。", systemImage: "checkmark.shield.fill")
-                    SecureField("加密备份密码（如适用）", text: $password)
-                    Button { showImporter = true } label: {
+                    Label("支持 .pocketpass 和 .json；重复数据会自动跳过。", systemImage: "checkmark.shield.fill")
+                    Button {
+                        settings.beginExternalFileInteraction()
+                        showImporter = true
+                    } label: {
                         Label("选择文件并导入", systemImage: "square.and.arrow.down")
+                    }
+                    if let selectedImportFilename {
+                        Label(
+                            settings.language.text("已选择：\(selectedImportFilename)", "Selected: \(selectedImportFilename)"),
+                            systemImage: "doc.fill"
+                        )
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -323,10 +400,26 @@ struct IOSDataManagementView: View {
             }
         }
         .navigationTitle(Text(LocalizedStringKey(mode == .importData ? "导入数据" : "导出数据")))
-        .fileImporter(isPresented: $showImporter, allowedContentTypes: IOSVaultDocument.readableContentTypes) { result in
-            handleImport(result)
+        .sheet(isPresented: $showImporter, onDismiss: {
+            settings.endExternalFileInteraction()
+        }) {
+            IOSBackupDocumentPicker {
+                let selectedURL = $0
+                showImporter = false
+                Task { @MainActor in
+                    // UIDocumentPicker's dismissal callback is unreliable when
+                    // hosted by a SwiftUI sheet. Wait for its transition to end
+                    // before presenting the encrypted-backup password sheet.
+                    try? await Task.sleep(for: .milliseconds(800))
+                    handleImport(.success(selectedURL))
+                }
+            } onCancel: {
+                showImporter = false
+            }
+            .ignoresSafeArea()
         }
-        .fileExporter(isPresented: $showExporter, document: exportDocument, contentType: .data, defaultFilename: exportFilename) { result in
+        .fileExporter(isPresented: $showExporter, document: exportDocument, contentType: format.contentType, defaultFilename: exportFilename) { result in
+            settings.endExternalFileInteraction()
             isWorking = false
             progress = 1
             switch result {
@@ -337,6 +430,36 @@ struct IOSDataManagementView: View {
                 )
             case .failure(let error): resultMessage = error.localizedDescription
             }
+        }
+        .sheet(isPresented: $showImportPasswordPrompt) {
+            NavigationStack {
+                Form {
+                    Section {
+                        SecureField("加密备份密码", text: $password)
+                            .textContentType(.password)
+                    } header: {
+                        Text(settings.language.text("输入备份密码", "Enter Backup Password"))
+                    } footer: {
+                        Text(settings.language.text(
+                            "该备份已加密，请输入 Mac 端导出时设置的密码。",
+                            "This backup is encrypted. Enter the password used when it was exported on Mac."
+                        ))
+                    }
+                }
+                .navigationTitle(settings.language.text("解锁备份", "Unlock Backup"))
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("取消") { cancelPendingImport() }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("导入") { importPendingEncryptedBackup() }
+                            .disabled(password.isEmpty)
+                    }
+                }
+            }
+            .presentationDetents([.height(260)])
+            .presentationDragIndicator(.visible)
         }
         .alert("数据处理结果", isPresented: Binding(get: { resultMessage != nil }, set: { if !$0 { resultMessage = nil } })) {
             Button("好") { resultMessage = nil }
@@ -362,6 +485,7 @@ struct IOSDataManagementView: View {
                 exportDocument = IOSVaultDocument(data: data)
                 exportFilename = "PocketPass-\(ISO8601DateFormatter().string(from: .now).prefix(10)).\(selectedFormat.fileExtension)"
                 progress = 0.75
+                settings.beginExternalFileInteraction()
                 showExporter = true
             } catch {
                 isWorking = false
@@ -371,40 +495,122 @@ struct IOSDataManagementView: View {
     }
 
     private func handleImport(_ result: Result<URL, Error>) {
+        guard case .success(let url) = result else {
+            if case .failure(let error) = result,
+               (error as? CocoaError)?.code != .userCancelled {
+                resultMessage = settings.language.text(
+                    "选择文件失败：\(error.localizedDescription)",
+                    "Could not select file: \(error.localizedDescription)"
+                )
+            }
+            return
+        }
+        selectedImportFilename = url.lastPathComponent
         isWorking = true
         progress = 0.1
         Task {
             do {
-                let url = try result.get()
-                let backupPassword = password
-                let baseCategories = store.categories
+                let data = try await Task.detached(priority: .userInitiated) {
+                    try coordinatedImportData(from: url)
+                }.value
+                if VaultDataTransfer.isEncryptedBackup(data) {
+                    pendingImportData = data
+                    pendingImportExtension = url.pathExtension.lowercased()
+                    password = ""
+                    isWorking = false
+                    progress = 0
+                    showImportPasswordPrompt = true
+                } else {
+                    performImport(data: data, fileExtension: url.pathExtension.lowercased(), backupPassword: "")
+                }
+            } catch {
+                isWorking = false
+                progress = 0
+                resultMessage = settings.language.text("导入失败：\(error.localizedDescription)", "Import failed: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func importPendingEncryptedBackup() {
+        guard let data = pendingImportData else { return }
+        let fileExtension = pendingImportExtension
+        let backupPassword = password
+        showImportPasswordPrompt = false
+        pendingImportData = nil
+        pendingImportExtension = ""
+        performImport(data: data, fileExtension: fileExtension, backupPassword: backupPassword)
+    }
+
+    private func cancelPendingImport() {
+        showImportPasswordPrompt = false
+        pendingImportData = nil
+        pendingImportExtension = ""
+        password = ""
+        selectedImportFilename = nil
+        isWorking = false
+        progress = 0
+    }
+
+    private func performImport(data: Data, fileExtension: String, backupPassword: String) {
+        isWorking = true
+        progress = 0.35
+        let baseCategories = store.categories
+        Task {
+            do {
                 let snapshot = try await Task.detached(priority: .userInitiated) {
-                    guard url.startAccessingSecurityScopedResource() else { throw CocoaError(.fileReadNoPermission) }
-                    defer { url.stopAccessingSecurityScopedResource() }
-                    let data = try VaultDataTransfer.importData(from: url)
-                    switch url.pathExtension.lowercased() {
-                    case "pocketpass": return try VaultDataTransfer.decryptBackup(data, password: backupPassword)
+                    if VaultDataTransfer.isEncryptedBackup(data) {
+                        return try VaultDataTransfer.decryptBackup(data, password: backupPassword)
+                    }
+                    switch fileExtension {
                     case "json": return try VaultDataTransfer.snapshot(fromJSON: data)
                     case "csv": return try VaultDataTransfer.snapshot(fromCSV: data, baseCategories: baseCategories)
                     case "md", "markdown", "txt": return try VaultDataTransfer.snapshot(fromMarkdown: data, baseCategories: baseCategories)
-                    default:
-                        if VaultDataTransfer.isEncryptedBackup(data) { return try VaultDataTransfer.decryptBackup(data, password: backupPassword) }
-                        return try VaultDataTransfer.snapshot(fromJSON: data)
+                    default: return try VaultDataTransfer.snapshot(fromJSON: data)
                     }
                 }.value
                 progress = 0.75
                 let result = store.merge(snapshot)
                 progress = 1
                 isWorking = false
+                password = ""
                 resultMessage = settings.language.text(
                     "导入完成：新增 \(result.inserted)，更新 \(result.updated)，跳过重复 \(result.skipped)",
                     "Import complete: \(result.inserted) added, \(result.updated) updated, \(result.skipped) duplicates skipped"
                 )
             } catch {
                 isWorking = false
+                progress = 0
+                password = ""
                 resultMessage = settings.language.text("导入失败：\(error.localizedDescription)", "Import failed: \(error.localizedDescription)")
             }
         }
+    }
+
+    /// File-provider URLs (especially iCloud Drive) must be coordinated while
+    /// their security scope is active. Some providers return `false` from
+    /// `startAccessingSecurityScopedResource()` when access is already granted,
+    /// so that return value alone must not reject an otherwise readable file.
+    private nonisolated func coordinatedImportData(from url: URL) throws -> Data {
+        let isAccessing = url.startAccessingSecurityScopedResource()
+        defer {
+            if isAccessing { url.stopAccessingSecurityScopedResource() }
+        }
+
+        var coordinatedError: NSError?
+        var readResult: Result<Data, Error>?
+        NSFileCoordinator().coordinate(
+            readingItemAt: url,
+            options: .withoutChanges,
+            error: &coordinatedError
+        ) { coordinatedURL in
+            readResult = Result {
+                try VaultDataTransfer.importData(from: coordinatedURL)
+            }
+        }
+
+        if let readResult { return try readResult.get() }
+        if let coordinatedError { throw coordinatedError }
+        throw CocoaError(.fileReadUnknown)
     }
 }
 

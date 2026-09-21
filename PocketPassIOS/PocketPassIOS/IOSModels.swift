@@ -39,6 +39,7 @@ final class IOSAppSettings: ObservableObject {
     }
     @Published private(set) var isLocked: Bool
     private var autoLockTask: Task<Void, Never>?
+    private var externalFileInteractionCount = 0
 
     init() {
         appearance = IOSAppearance(rawValue: UserDefaults.standard.string(forKey: "iosAppearance") ?? "") ?? .dark
@@ -52,6 +53,11 @@ final class IOSAppSettings: ObservableObject {
     func appBecameInactive() {
         guard appLockEnabled else { return }
         autoLockTask?.cancel()
+        // A document picker temporarily makes the host scene inactive. Locking
+        // here would destroy the importing view before its result callback can
+        // run, so keep the scene alive only for an explicitly started file
+        // import/export interaction.
+        guard externalFileInteractionCount == 0 else { return }
         if lockAfterSeconds == 0 { isLocked = true; return }
         autoLockTask = Task { @MainActor [weak self] in
             try? await Task.sleep(for: .seconds(self?.lockAfterSeconds ?? 300))
@@ -63,4 +69,13 @@ final class IOSAppSettings: ObservableObject {
     func appBecameActive() { autoLockTask?.cancel() }
     func unlockSucceeded() { isLocked = false }
     func lockNow() { if appLockEnabled { isLocked = true } }
+
+    func beginExternalFileInteraction() {
+        externalFileInteractionCount += 1
+        autoLockTask?.cancel()
+    }
+
+    func endExternalFileInteraction() {
+        externalFileInteractionCount = max(0, externalFileInteractionCount - 1)
+    }
 }

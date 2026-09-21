@@ -83,8 +83,8 @@ struct AddFieldPickerView: View {
         .background(PocketTheme.background)
         .buttonBorderShape(.capsule)
         .sheet(isPresented: $showingCustomField) {
-            CustomFieldNameView { name in
-                addField(name: name, isSecret: false)
+            CustomFieldNameView { name, isSecret in
+                addField(name: name, isSecret: isSecret)
             }
         }
     }
@@ -97,8 +97,9 @@ struct AddFieldPickerView: View {
 
 private struct CustomFieldNameView: View {
     @Environment(\.dismiss) private var dismiss
-    let onAdd: (String) -> Void
+    let onAdd: (String, Bool) -> Void
     @State private var name = ""
+    @State private var isSecret = false
 
     private var trimmedName: String {
         name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -115,7 +116,7 @@ private struct CustomFieldNameView: View {
                     .padding(.horizontal, 18).padding(.vertical, 10)
                     .background(PocketTheme.card).clipShape(Capsule())
                 Button("保存") {
-                    onAdd(trimmedName)
+                    onAdd(trimmedName, isSecret)
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal, 18).padding(.vertical, 10)
@@ -131,10 +132,30 @@ private struct CustomFieldNameView: View {
                 .clipShape(Capsule())
                 .padding(.top, 28)
 
+            Toggle(isOn: $isSecret) {
+                HStack(spacing: 12) {
+                    Image(systemName: isSecret ? "lock.fill" : "textformat")
+                        .foregroundStyle(isSecret ? PocketTheme.accent : PocketTheme.muted)
+                        .frame(width: 24)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("加密字段").font(.body.weight(.semibold))
+                        Text("开启后默认隐藏内容，详情页可手动显示。")
+                            .font(.caption).foregroundStyle(PocketTheme.muted)
+                    }
+                }
+            }
+            .toggleStyle(.switch)
+            .accessibilityLabel("加密字段")
+            .accessibilityHint("开启后默认隐藏内容，详情页可手动显示")
+            .padding(.horizontal, 16).padding(.vertical, 12)
+            .background(PocketTheme.card)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .padding(.top, 12)
+
             Spacer()
         }
         .padding(24)
-        .frame(width: 470, height: 230)
+        .frame(width: 470, height: 315)
         .background(PocketTheme.background)
         .buttonBorderShape(.capsule)
     }

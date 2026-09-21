@@ -35,12 +35,107 @@ public struct LoginAccount: Identifiable, Hashable, Codable, Sendable {
     public var username: String
     public var password: String
     public var fields: [CustomField]
+    public var usernameFieldID: UUID
+    public var passwordFieldID: UUID
+    public var fieldOrder: [UUID]
 
-    public init(id: UUID = UUID(), username: String, password: String, fields: [CustomField] = []) {
+    public init(
+        id: UUID = UUID(),
+        username: String,
+        password: String,
+        fields: [CustomField] = [],
+        usernameFieldID: UUID = UUID(),
+        passwordFieldID: UUID = UUID(),
+        fieldOrder: [UUID]? = nil
+    ) {
         self.id = id
         self.username = username
         self.password = password
         self.fields = fields
+        self.usernameFieldID = usernameFieldID
+        self.passwordFieldID = passwordFieldID
+        self.fieldOrder = fieldOrder ?? [usernameFieldID, passwordFieldID] + fields.map(\.id)
+    }
+}
+
+public extension LoginAccount {
+    enum FieldKind: Hashable, Sendable {
+        case username
+        case password
+        case custom(UUID)
+    }
+
+    var orderedFieldIDs: [UUID] {
+        var seen = Set<UUID>()
+        let valid = Set([usernameFieldID, passwordFieldID] + fields.map(\.id))
+        var result = fieldOrder.filter { valid.contains($0) && seen.insert($0).inserted }
+        for field in fields where seen.insert(field.id).inserted {
+            result.append(field.id)
+        }
+        return result
+    }
+
+    var hasUsernameField: Bool { orderedFieldIDs.contains(usernameFieldID) }
+    var hasPasswordField: Bool { orderedFieldIDs.contains(passwordFieldID) }
+    var summaryValue: String {
+        if hasUsernameField, !username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return username
+        }
+        for fieldID in orderedFieldIDs {
+            guard let field = fields.first(where: { $0.id == fieldID }),
+                  !field.value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { continue }
+            return field.isSecret ? "••••••••" : field.value
+        }
+        return ""
+    }
+
+    func fieldKind(for fieldID: UUID) -> FieldKind? {
+        if fieldID == usernameFieldID { return .username }
+        if fieldID == passwordFieldID { return .password }
+        return fields.contains(where: { $0.id == fieldID }) ? .custom(fieldID) : nil
+    }
+
+    mutating func addUsernameField() {
+        normalizeFieldOrder()
+        guard !fieldOrder.contains(usernameFieldID) else { return }
+        fieldOrder.append(usernameFieldID)
+    }
+
+    mutating func addPasswordField() {
+        normalizeFieldOrder()
+        guard !fieldOrder.contains(passwordFieldID) else { return }
+        fieldOrder.append(passwordFieldID)
+    }
+
+    mutating func appendField(_ field: CustomField) {
+        normalizeFieldOrder()
+        fields.append(field)
+        fieldOrder.append(field.id)
+    }
+
+    mutating func removeField(_ fieldID: UUID) {
+        normalizeFieldOrder()
+        fieldOrder.removeAll { $0 == fieldID }
+        if fieldID == usernameFieldID {
+            username = ""
+        } else if fieldID == passwordFieldID {
+            password = ""
+        } else {
+            fields.removeAll { $0.id == fieldID }
+        }
+    }
+
+    mutating func moveField(_ fieldID: UUID, by offset: Int) {
+        normalizeFieldOrder()
+        guard let source = fieldOrder.firstIndex(of: fieldID) else { return }
+        let destination = min(max(0, source + offset), fieldOrder.count - 1)
+        guard source != destination else { return }
+        let entry = fieldOrder.remove(at: source)
+        fieldOrder.insert(entry, at: destination)
+    }
+
+    mutating func normalizeFieldOrder() {
+        fieldOrder = orderedFieldIDs
     }
 }
 
@@ -170,9 +265,16 @@ public extension LoginAccount {
         username = try container.decodeIfPresent(String.self, forKey: .username) ?? ""
         password = try container.decodeIfPresent(String.self, forKey: .password) ?? ""
         fields = try container.decodeIfPresent([CustomField].self, forKey: .fields) ?? []
+        usernameFieldID = try container.decodeIfPresent(UUID.self, forKey: .usernameFieldID) ?? UUID()
+        passwordFieldID = try container.decodeIfPresent(UUID.self, forKey: .passwordFieldID) ?? UUID()
+        fieldOrder = try container.decodeIfPresent([UUID].self, forKey: .fieldOrder)
+            ?? [usernameFieldID, passwordFieldID] + fields.map(\.id)
+        normalizeFieldOrder()
     }
 
-    private enum CodingKeys: String, CodingKey { case id, username, password, fields }
+    private enum CodingKeys: String, CodingKey {
+        case id, username, password, fields, usernameFieldID, passwordFieldID, fieldOrder
+    }
 }
 
 public extension VaultItem {

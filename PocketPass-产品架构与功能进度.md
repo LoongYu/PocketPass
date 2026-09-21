@@ -1,8 +1,8 @@
 # PocketPass｜口袋密码：产品架构与功能进度
 
-更新日期：2026-08-22
+更新日期：2026-09-21
 
-当前版本：`V1.2(3)`
+当前版本：`V1.2(4)`
 
 产品定位：Apple 平台本地优先账户密码管理器
 
@@ -14,9 +14,13 @@
 | iPhone | 已实现并完成适配 | iOS 26 | Xcode 工程、本地模拟器/真机开发构建 |
 | iPad | 已实现并完成自适应分栏 | iPadOS 26 | 与 iPhone 共用一个 Universal iOS target |
 
-macOS 安装包：`dist/PocketPass-2026082201.dmg`
+macOS 安装包：`dist/PocketPass-V1.2(4)-20260921.dmg`
 
-SHA-256：`2ab0688a5ec59fe72b4f5152191778c23d65ed067152f30b998cecb7faf89b7a`
+SHA-256：`aead82bee37e433c7b6b898ae96b38b71c03e122e0ab4c21a6feb6c8e3ce4bc1`
+
+iOS / iPadOS 未签名安装包：`dist/PocketPass-V1.2(4)-unsigned.ipa`
+
+iOS IPA SHA-256：`9d520591c2ea4d3ee6f2ccdd2549db6635a796e70c69be8b2fa4585a7d8a771e`
 
 macOS Bundle ID：`com.loongyu.pocketpass`
 
@@ -134,7 +138,7 @@ iOS/iPadOS Bundle ID：`com.loongyu.pocketpass.ios`
 ## 五、当前测试与构建能力
 
 - 标准 Swift Testing target：`Tests/PocketPassCoreTests/`。
-- 当前 18 项共享核心自动测试全部通过。
+- 当前 19 项共享核心自动测试全部通过。
 - 覆盖加密持久化、密钥缺失保护、回收站、30 天清理、分类迁移/排序、标签、图标库、资源边界、搜索、密码生成、旧数据兼容、四格式往返和重复导入。
 - `xcodebuild analyze` 已通过。
 - iPhone 17 Pro Max、iPhone 17e、iPad mini (A17 Pro)、iPad Pro 13-inch (M5) 模拟器完成代表性尺寸验证。

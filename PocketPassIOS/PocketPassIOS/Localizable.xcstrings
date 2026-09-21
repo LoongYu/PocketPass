@@ -20,9 +20,36 @@
         }
       }
     },
-    "%lld" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld" } } } },
-    "%lld items" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld items" } } } },
-    "%lld 项" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld items" } } } },
+    "%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        }
+      }
+    },
+    "%lld items" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld items"
+          }
+        }
+      }
+    },
+    "%lld 项" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld items"
+          }
+        }
+      }
+    },
     "1 分钟" : {
       "localizations" : {
         "en" : {
@@ -63,7 +90,16 @@
         }
       }
     },
-    "App Store" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "App Store" } } } },
+    "App Store" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Store"
+          }
+        }
+      }
+    },
     "App Store 图标" : {
       "localizations" : {
         "en" : {
@@ -74,7 +110,16 @@
         }
       }
     },
-    "English" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "English" } } } },
+    "English" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "English"
+          }
+        }
+      }
+    },
     "iCloud 同步" : {
       "localizations" : {
         "en" : {
@@ -128,7 +173,16 @@
         }
       }
     },
-    "与账户图标使用同一选择器" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Uses the same picker as account icons" } } } },
+    "与账户图标使用同一选择器" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uses the same picker as account icons"
+          }
+        }
+      }
+    },
     "中国" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -161,8 +215,26 @@
         }
       }
     },
-    "仅在你主动搜索 App Store 图标或获取网站图标时访问网络。" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Network access occurs only when you search for App Store icons or fetch a website icon." } } } },
-    "从相册选择一张图片作为账户或分类图标" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose a photo as an account or category icon" } } } },
+    "仅在你主动搜索 App Store 图标或获取网站图标时访问网络。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Network access occurs only when you search for App Store icons or fetch a website icon."
+          }
+        }
+      }
+    },
+    "从相册选择一张图片作为账户或分类图标" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a photo as an account or category icon"
+          }
+        }
+      }
+    },
     "使用" : {
       "localizations" : {
         "en" : {
@@ -173,7 +245,16 @@
         }
       }
     },
-    "使用 Face ID 或设备密码解锁" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Unlock with Face ID or device passcode" } } } },
+    "使用 Face ID 或设备密码解锁" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlock with Face ID or device passcode"
+          }
+        }
+      }
+    },
     "保存" : {
       "localizations" : {
         "en" : {
@@ -236,7 +317,16 @@
         }
       }
     },
-    "最多保存 100 枚自定义图标" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Store up to 100 custom icons" } } } },
+    "最多保存 100 枚自定义图标" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Store up to 100 custom icons"
+          }
+        }
+      }
+    },
     "最近修改" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -298,7 +388,16 @@
         }
       }
     },
-    "删除已选 %lld 项" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete %lld selected items" } } } },
+    "删除已选 %lld 项" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete %lld selected items"
+          }
+        }
+      }
+    },
     "删除的账户将在这里保留 30 天" : {
       "localizations" : {
         "en" : {
@@ -330,7 +429,23 @@
         }
       }
     },
-    "加密备份密码（如适用）" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Encrypted backup password (if applicable)" } } } },
+    "加密备份密码" : {
+
+    },
+    "加密备份密码（如适用）" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encrypted backup password (if applicable)"
+          }
+        }
+      }
+    },
+    "加密字段" : {
+
+    },
     "单张图片需小于 2 MB，每个账户最多 5 张。" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -372,7 +487,16 @@
         }
       }
     },
-    "口袋密码已锁定" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "PocketPass is Locked" } } } },
+    "口袋密码已锁定" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PocketPass is Locked"
+          }
+        }
+      }
+    },
     "名称" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -434,8 +558,26 @@
         }
       }
     },
-    "图标库为空" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Icon Library is Empty" } } } },
-    "图标来源" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Icon Source" } } } },
+    "图标库为空" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Icon Library is Empty"
+          }
+        }
+      }
+    },
+    "图标来源" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Icon Source"
+          }
+        }
+      }
+    },
     "图标选择" : {
       "localizations" : {
         "en" : {
@@ -477,7 +619,16 @@
         }
       }
     },
-    "复制的字段将在 30 秒后自动清除；如果剪贴板内容已变化则不会覆盖。" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Copied fields are cleared after 30 seconds unless the clipboard has changed." } } } },
+    "复制的字段将在 30 秒后自动清除；如果剪贴板内容已变化则不会覆盖。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copied fields are cleared after 30 seconds unless the clipboard has changed."
+          }
+        }
+      }
+    },
     "大写字母" : {
       "localizations" : {
         "en" : {
@@ -488,7 +639,16 @@
         }
       }
     },
-    "好" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "OK" } } } },
+    "好" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
     "字段内容" : {
       "localizations" : {
         "en" : {
@@ -559,6 +719,9 @@
         }
       }
     },
+    "导入" : {
+
+    },
     "导入数据" : {
       "localizations" : {
         "en" : {
@@ -579,7 +742,16 @@
         }
       }
     },
-    "导出格式" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Export Format" } } } },
+    "导出格式" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export Format"
+          }
+        }
+      }
+    },
     "工作" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -611,7 +783,16 @@
         }
       }
     },
-    "已选 %lld/5 张" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld/5 selected" } } } },
+    "已选 %lld/5 张" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld/5 selected"
+          }
+        }
+      }
+    },
     "常用" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -623,6 +804,9 @@
         }
       }
     },
+    "开启后默认隐藏内容，详情页可手动显示。" : {
+
+    },
     "开始导出" : {
       "localizations" : {
         "en" : {
@@ -633,7 +817,16 @@
         }
       }
     },
-    "当前版本不接入 iCloud，不会上传账户和密码。" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "This version does not use iCloud and never uploads accounts or passwords." } } } },
+    "当前版本不接入 iCloud，不会上传账户和密码。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This version does not use iCloud and never uploads accounts or passwords."
+          }
+        }
+      }
+    },
     "当前版本不接入 iCloud，数据保存在设备本地加密密码库中。" : {
       "localizations" : {
         "en" : {
@@ -654,8 +847,26 @@
         }
       }
     },
-    "恢复" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Restore" } } } },
-    "所选相册图片仅用于账户附件或自定义图标。" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Selected photos are used only for account attachments or custom icons." } } } },
+    "恢复" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore"
+          }
+        }
+      }
+    },
+    "所选相册图片仅用于账户附件或自定义图标。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selected photos are used only for account attachments or custom icons."
+          }
+        }
+      }
+    },
     "手机号" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -667,7 +878,16 @@
         }
       }
     },
-    "批量移到回收站？" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Move Selected Items to Trash?" } } } },
+    "批量移到回收站？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move Selected Items to Trash?"
+          }
+        }
+      }
+    },
     "批量管理" : {
       "localizations" : {
         "en" : {
@@ -678,7 +898,19 @@
         }
       }
     },
-    "搜索 App Store" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Search the App Store" } } } },
+    "拖动调整字段顺序" : {
+
+    },
+    "搜索 App Store" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search the App Store"
+          }
+        }
+      }
+    },
     "搜索账户" : {
       "localizations" : {
         "en" : {
@@ -689,37 +921,20 @@
         }
       }
     },
-    "未找到匹配账户" : {
+    "支持 .pocketpass 和 .json；重复数据会自动跳过。" : {
+
+    },
+    "支持 .pocketpass、.json、.csv 和 .md；重复数据会自动跳过。" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No matching accounts"
+            "value" : "Supports .pocketpass, .json, .csv, and .md; duplicates are skipped automatically."
           }
         }
       }
     },
-    "清除搜索" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clear search"
-          }
-        }
-      }
-    },
-    "请尝试其它关键词或分类" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Try another keyword or category"
-          }
-        }
-      }
-    },
-    "支持 .pocketpass、.json、.csv 和 .md；重复数据会自动跳过。" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Supports .pocketpass, .json, .csv, and .md; duplicates are skipped automatically." } } } },
     "数字" : {
       "localizations" : {
         "en" : {
@@ -760,7 +975,19 @@
         }
       }
     },
-    "无法添加图片" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Unable to Add Image" } } } },
+    "无法添加图片" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unable to Add Image"
+          }
+        }
+      }
+    },
+    "显示" : {
+
+    },
     "暂无标签" : {
       "localizations" : {
         "en" : {
@@ -781,17 +1008,8 @@
         }
       }
     },
-    "规划中" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Planned"
-          }
-        }
-      }
-    },
     "暂未开放" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -801,7 +1019,27 @@
         }
       }
     },
-    "本地优先的原生账户密码管理器，支持多登录账号、自定义字段、分类、标签、图片附件、密码生成和多格式数据迁移。" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "A native, local-first password manager with multiple logins, custom fields, categories, tags, image attachments, password generation, and multi-format data migration." } } } },
+    "未找到匹配账户" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No matching accounts"
+          }
+        }
+      }
+    },
+    "本地优先的原生账户密码管理器，支持多登录账号、自定义字段、分类、标签、图片附件、密码生成和多格式数据迁移。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A native, local-first password manager with multiple logins, custom fields, categories, tags, image attachments, password generation, and multi-format data migration."
+          }
+        }
+      }
+    },
     "本地密码库" : {
       "localizations" : {
         "en" : {
@@ -853,7 +1091,16 @@
         }
       }
     },
-    "格式" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Format" } } } },
+    "格式" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Format"
+          }
+        }
+      }
+    },
     "正在处理…" : {
       "localizations" : {
         "en" : {
@@ -956,6 +1203,16 @@
         }
       }
     },
+    "清除搜索" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear search"
+          }
+        }
+      }
+    },
     "游戏" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -967,7 +1224,16 @@
         }
       }
     },
-    "版本" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Version" } } } },
+    "版本" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version"
+          }
+        }
+      }
+    },
     "生成密码" : {
       "localizations" : {
         "en" : {
@@ -989,6 +1255,9 @@
         }
       }
     },
+    "用户名 / 手机号 / 邮箱" : {
+
+    },
     "登录账号" : {
       "localizations" : {
         "en" : {
@@ -999,7 +1268,16 @@
         }
       }
     },
-    "登录账号 %lld" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Login %lld" } } } },
+    "登录账号 %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Login %lld"
+          }
+        }
+      }
+    },
     "相册" : {
       "localizations" : {
         "en" : {
@@ -1143,8 +1421,26 @@
         }
       }
     },
-    "自定义字段" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Custom Fields" } } } },
-    "自选颜色" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Custom Color" } } } },
+    "自定义字段" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom Fields"
+          }
+        }
+      }
+    },
+    "自选颜色" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom Color"
+          }
+        }
+      }
+    },
     "英语" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1156,9 +1452,46 @@
         }
       }
     },
-    "获取图标失败" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Failed to Get Icon" } } } },
-    "获取网站图标" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Get Website Icon" } } } },
-    "解锁" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Unlock" } } } },
+    "获取图标失败" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed to Get Icon"
+          }
+        }
+      }
+    },
+    "获取网站图标" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get Website Icon"
+          }
+        }
+      }
+    },
+    "规划中" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planned"
+          }
+        }
+      }
+    },
+    "解锁" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlock"
+          }
+        }
+      }
+    },
     "设置" : {
       "localizations" : {
         "en" : {
@@ -1179,6 +1512,16 @@
         }
       }
     },
+    "请尝试其它关键词或分类" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try another keyword or category"
+          }
+        }
+      }
+    },
     "账户" : {
       "localizations" : {
         "en" : {
@@ -1189,7 +1532,16 @@
         }
       }
     },
-    "账户数据在写入设备前使用 AES-GCM 加密。" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Account data is encrypted with AES-GCM before being written to the device." } } } },
+    "账户数据在写入设备前使用 AES-GCM 加密。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Account data is encrypted with AES-GCM before being written to the device."
+          }
+        }
+      }
+    },
     "购物" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1282,7 +1634,16 @@
         }
       }
     },
-    "重命名标签" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Rename Tag" } } } },
+    "重命名标签" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rename Tag"
+          }
+        }
+      }
+    },
     "重新生成" : {
       "localizations" : {
         "en" : {
@@ -1314,7 +1675,16 @@
         }
       }
     },
-    "长按并拖动可自定义首页分类顺序。删除分类时，账户会自动移到其他分类。" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Touch and hold, then drag to reorder home categories. Accounts move to another category when a category is deleted." } } } },
+    "长按并拖动可自定义首页分类顺序。删除分类时，账户会自动移到其他分类。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touch and hold, then drag to reorder home categories. Accounts move to another category when a category is deleted."
+          }
+        }
+      }
+    },
     "隐私说明" : {
       "localizations" : {
         "en" : {
@@ -1324,6 +1694,9 @@
           }
         }
       }
+    },
+    "隐藏" : {
+
     },
     "首页" : {
       "localizations" : {

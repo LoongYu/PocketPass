@@ -314,7 +314,40 @@ struct VaultCoreTests {
         #expect(item.website.isEmpty)
         #expect(item.tags.isEmpty)
         #expect(item.accounts.first?.fields.isEmpty == true)
+        #expect(item.accounts.first?.orderedFieldIDs.count == 2)
+        #expect(item.accounts.first?.hasUsernameField == true)
+        #expect(item.accounts.first?.hasPasswordField == true)
         #expect(item.isFavorite == false)
+    }
+
+    @Test
+    func loginFieldsCanBeDeletedReorderedAndRoundTrip() throws {
+        var account = LoginAccount(
+            username: "user",
+            password: "password",
+            fields: [CustomField(name: "邮箱", value: "user@example.com")]
+        )
+        let emailID = try #require(account.fields.first?.id)
+
+        account.moveField(emailID, by: -2)
+        account.removeField(account.usernameFieldID)
+
+        #expect(account.orderedFieldIDs == [emailID, account.passwordFieldID])
+        #expect(account.username.isEmpty)
+        #expect(!account.hasUsernameField)
+        #expect(account.hasPasswordField)
+
+        let category = try #require(VaultCategory.defaultCategories.first)
+        let snapshot = VaultSnapshot(
+            categories: [category],
+            items: [VaultItem(name: "字段顺序", categoryID: category.id, accounts: [account])]
+        )
+        let restored = try VaultDataTransfer.snapshot(fromJSON: VaultDataTransfer.json(snapshot: snapshot))
+        let restoredAccount = try #require(restored.items.first?.accounts.first)
+
+        #expect(restoredAccount.orderedFieldIDs == [emailID, account.passwordFieldID])
+        #expect(!restoredAccount.hasUsernameField)
+        #expect(restoredAccount.hasPasswordField)
     }
 
     @Test

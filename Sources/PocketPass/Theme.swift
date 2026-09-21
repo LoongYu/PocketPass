@@ -4,7 +4,7 @@ import AppKit
 enum PocketTheme {
     static let background = adaptive(
         light: NSColor(calibratedRed: 0.965, green: 0.957, blue: 0.945, alpha: 1),
-        dark: NSColor(calibratedRed: 0.055, green: 0.05, blue: 0.045, alpha: 1)
+        dark: NSColor(calibratedRed: 0.045, green: 0.041, blue: 0.037, alpha: 1)
     )
     static let panel = adaptive(
         light: NSColor(calibratedRed: 0.925, green: 0.91, blue: 0.885, alpha: 1),
@@ -15,8 +15,8 @@ enum PocketTheme {
         dark: NSColor(calibratedRed: 0.145, green: 0.13, blue: 0.115, alpha: 1)
     )
     static let input = adaptive(
-        light: NSColor(calibratedRed: 0.90, green: 0.885, blue: 0.855, alpha: 1),
-        dark: NSColor(calibratedRed: 0.105, green: 0.095, blue: 0.085, alpha: 1)
+        light: NSColor(calibratedRed: 0.91, green: 0.895, blue: 0.87, alpha: 1),
+        dark: NSColor(calibratedRed: 0.15, green: 0.135, blue: 0.12, alpha: 1)
     )
     static let elevated = adaptive(
         light: NSColor(calibratedRed: 0.86, green: 0.84, blue: 0.80, alpha: 1),
@@ -24,17 +24,17 @@ enum PocketTheme {
     )
     /// Dominant gold sampled from the official PocketPass lock mark (#FDBF02).
     static let accent = Color(red: 253.0 / 255.0, green: 191.0 / 255.0, blue: 2.0 / 255.0)
-    static let accentDeep = Color(red: 0.86, green: 0.55, blue: 0.0)
+    static let accentDeep = Color(red: 0.78, green: 0.48, blue: 0.0)
     static let primary = Color.primary
     static let muted = Color.secondary
-    static let border = Color.primary.opacity(0.09)
+    static let border = Color.primary.opacity(0.07)
     static let controlFill = Color.primary.opacity(0.065)
     static let inset = adaptive(
         light: NSColor(calibratedWhite: 0, alpha: 0.045),
         dark: NSColor(calibratedWhite: 0, alpha: 0.18)
     )
     static let primaryButton = accent
-    static let primaryButtonText = Color.white
+    static let primaryButtonText = Color.black
 
     private static func adaptive(light: NSColor, dark: NSColor) -> Color {
         Color(nsColor: NSColor(name: nil) { appearance in

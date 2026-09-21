@@ -18,6 +18,68 @@
     <string>$(CURRENT_PROJECT_VERSION)</string>
     <key>CFBundleDisplayName</key>
     <string>口袋密码</string>
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>PocketPass Backup</string>
+            <key>CFBundleTypeRole</key>
+            <string>Viewer</string>
+            <key>LSHandlerRank</key>
+            <string>Owner</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>com.loongyu.pocketpass.backup</string>
+                <string>com.loongyu.pockit.backup</string>
+            </array>
+        </dict>
+    </array>
+    <key>UTExportedTypeDeclarations</key>
+    <array>
+        <dict>
+            <key>UTTypeConformsTo</key>
+            <array>
+                <string>public.data</string>
+            </array>
+            <key>UTTypeDescription</key>
+            <string>PocketPass Encrypted Backup</string>
+            <key>UTTypeIdentifier</key>
+            <string>com.loongyu.pocketpass.backup</string>
+            <key>UTTypeTagSpecification</key>
+            <dict>
+                <key>public.filename-extension</key>
+                <array>
+                    <string>pocketpass</string>
+                </array>
+                <key>public.mime-type</key>
+                <string>application/x-pocketpass</string>
+            </dict>
+        </dict>
+    </array>
+    <key>UTImportedTypeDeclarations</key>
+    <array>
+        <dict>
+            <key>UTTypeConformsTo</key>
+            <array>
+                <string>public.data</string>
+            </array>
+            <key>UTTypeDescription</key>
+            <string>Legacy PocketPass Backup</string>
+            <key>UTTypeIdentifier</key>
+            <string>com.loongyu.pockit.backup</string>
+            <key>UTTypeTagSpecification</key>
+            <dict>
+                <key>public.filename-extension</key>
+                <array>
+                    <string>pocketpass</string>
+                </array>
+            </dict>
+        </dict>
+    </array>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>UIFileSharingEnabled</key>
+	<true/>
     <key>NSFaceIDUsageDescription</key>
     <string>用于解锁口袋密码并保护本地账户数据。</string>
     <key>CFBundleDevelopmentRegion</key>

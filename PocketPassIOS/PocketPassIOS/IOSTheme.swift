@@ -37,6 +37,50 @@ enum IOSTheme {
     static let muted = Color.secondary
 }
 
+struct IOSModalHeader: View {
+    let title: LocalizedStringKey
+    let canSave: Bool
+    let cancel: () -> Void
+    let save: () -> Void
+
+    var body: some View {
+        ZStack {
+            Text(title)
+                .font(.headline)
+
+            HStack {
+                Button(action: cancel) {
+                    Text("取消")
+                        .fontWeight(.semibold)
+                        .frame(width: 86, height: 48)
+                        .background(IOSTheme.panel, in: Capsule())
+                        .contentShape(Capsule())
+                }
+                .buttonStyle(.plain)
+
+                Spacer()
+
+                Button(action: save) {
+                    Text("保存")
+                        .fontWeight(.bold)
+                        .foregroundStyle(canSave ? .black : .secondary)
+                        .frame(width: 86, height: 48)
+                        .background(canSave ? IOSTheme.accent : Color.secondary.opacity(0.15), in: Capsule())
+                        .contentShape(Capsule())
+                }
+                .buttonStyle(.plain)
+                .disabled(!canSave)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(IOSTheme.background)
+        .overlay(alignment: .bottom) {
+            Divider().opacity(0.35)
+        }
+    }
+}
+
 struct IOSPanel: ViewModifier {
     var radius: CGFloat = 24
 

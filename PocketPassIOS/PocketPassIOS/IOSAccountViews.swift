@@ -7,6 +7,7 @@ struct IOSAccountDetailView: View {
     @EnvironmentObject private var settings: IOSAppSettings
     @Environment(\.dismiss) private var dismiss
     @State private var visiblePasswords: Set<UUID> = []
+    @State private var visibleSecretFields: Set<UUID> = []
     @State private var copiedField: String?
     @State private var showEditor = false
     @State private var confirmDelete = false
@@ -34,14 +35,35 @@ struct IOSAccountDetailView: View {
                         }
                         ForEach(Array(currentItem.accounts.enumerated()), id: \.element.id) { index, account in
                             VStack(alignment: .leading, spacing: 12) {
-                                Text(currentItem.accounts.count == 1
-                                     ? settings.language.text("账户", "Account")
-                                     : settings.language.text("登录账号 \(index + 1)", "Login \(index + 1)"))
+                                Text(account.hasUsernameField || account.hasPasswordField
+                                     ? (currentItem.accounts.count == 1
+                                        ? settings.language.text("账户", "Account")
+                                        : settings.language.text("登录账号 \(index + 1)", "Login \(index + 1)"))
+                                     : (currentItem.accounts.count == 1
+                                        ? settings.language.text("信息", "Information")
+                                        : settings.language.text("信息 \(index + 1)", "Information \(index + 1)")))
                                     .font(.headline).foregroundStyle(index == 0 ? IOSTheme.accent : .secondary)
-                                detailField("用户名", value: account.username)
-                                detailField("密码", value: visiblePasswords.contains(account.id) ? account.password : String(repeating: "•", count: min(10, max(1, account.password.count))), secretAccount: account)
-                                ForEach(account.fields) { field in
-                                    detailField(field.name, value: field.isSecret ? String(repeating: "•", count: min(10, max(1, field.value.count))) : field.value, copyValue: field.value)
+                                ForEach(account.orderedFieldIDs, id: \.self) { fieldID in
+                                    if fieldID == account.usernameFieldID {
+                                        detailField("用户名", value: account.username)
+                                    } else if fieldID == account.passwordFieldID {
+                                        detailField(
+                                            "密码",
+                                            value: visiblePasswords.contains(account.id)
+                                                ? account.password
+                                                : String(repeating: "•", count: min(10, max(1, account.password.count))),
+                                            secretAccount: account
+                                        )
+                                    } else if let field = account.fields.first(where: { $0.id == fieldID }) {
+                                        detailField(
+                                            field.name,
+                                            value: field.isSecret && !visibleSecretFields.contains(field.id)
+                                                ? String(repeating: "•", count: min(10, max(1, field.value.count)))
+                                                : field.value,
+                                            copyValue: field.value,
+                                            secretFieldID: field.isSecret ? field.id : nil
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -73,7 +95,13 @@ struct IOSAccountDetailView: View {
         }.buttonStyle(.plain)
     }
 
-    private func detailField(_ title: String, value: String, copyValue: String? = nil, secretAccount: LoginAccount? = nil) -> some View {
+    private func detailField(
+        _ title: String,
+        value: String,
+        copyValue: String? = nil,
+        secretAccount: LoginAccount? = nil,
+        secretFieldID: UUID? = nil
+    ) -> some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 7) {
                 Text(LocalizedStringKey(title)).font(.caption.weight(.semibold)).foregroundStyle(.secondary)
@@ -84,6 +112,19 @@ struct IOSAccountDetailView: View {
                 Button {
                     if visiblePasswords.contains(secretAccount.id) { visiblePasswords.remove(secretAccount.id) } else { visiblePasswords.insert(secretAccount.id) }
                 } label: { Image(systemName: visiblePasswords.contains(secretAccount.id) ? "eye.slash" : "eye") }.buttonStyle(.plain)
+            }
+            if let secretFieldID {
+                Button {
+                    if visibleSecretFields.contains(secretFieldID) {
+                        visibleSecretFields.remove(secretFieldID)
+                    } else {
+                        visibleSecretFields.insert(secretFieldID)
+                    }
+                } label: {
+                    Image(systemName: visibleSecretFields.contains(secretFieldID) ? "eye.slash" : "eye")
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(visibleSecretFields.contains(secretFieldID) ? "隐藏" : "显示")
             }
             Button {
                 IOSClipboardManager.copy(copyValue ?? secretAccount?.password ?? value)
@@ -116,6 +157,10 @@ struct IOSAccountEditorView: View {
     @State private var showFieldPicker = false
     @State private var selectedPhotos: [PhotosPickerItem] = []
     @State private var validationMessage: String?
+    @State private var visibleEditorPasswords: Set<UUID> = []
+    @State private var draggedFieldID: UUID?
+    @State private var dragOffsetY: CGFloat = 0
+    @State private var processedDragSteps = 0
 
     init(item: VaultItem? = nil) {
         self.item = item
@@ -133,89 +178,45 @@ struct IOSAccountEditorView: View {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    private var selectedCategoryName: String {
+        let selectedID = categoryID ?? store.categories.first?.id
+        return store.categories.first(where: { $0.id == selectedID })?.name ?? "其他"
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
                 IOSTheme.background.ignoresSafeArea()
                 ScrollView {
                     VStack(spacing: 14) {
-                        Button { showIconPicker = true } label: {
-                            VStack(spacing: 9) {
-                                IOSVaultIcon(symbol: symbol, data: iconData, size: 72, background: IOSTheme.accent)
-                                Text("图标选择").font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
-                            }
-                            .frame(maxWidth: .infinity).padding(.vertical, 18).iosPanel(radius: 22)
-                        }.buttonStyle(.plain)
-
-                        VStack(spacing: 10) {
-                            inputField("名称", text: $name)
-                            Picker("分类", selection: Binding(get: { categoryID ?? store.categories.first?.id }, set: { categoryID = $0 })) {
-                                ForEach(store.categories) { Text(LocalizedStringKey($0.name)).tag(Optional($0.id)) }
-                            }
-                            .pickerStyle(.menu).frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
-                            .padding(.horizontal, 16).background(IOSTheme.input, in: RoundedRectangle(cornerRadius: 17))
-                            Button { showTagPicker = true } label: {
-                                HStack {
-                                    Text(selectedTags.isEmpty ? "标签" : selectedTags.sorted().joined(separator: "、")).foregroundStyle(selectedTags.isEmpty ? .secondary : .primary)
-                                    Spacer(); Image(systemName: "tag")
-                                }
-                                .padding(.horizontal, 16).frame(minHeight: 50).background(IOSTheme.input, in: RoundedRectangle(cornerRadius: 17))
-                            }.buttonStyle(.plain)
-                        }
-                        .padding(12).iosPanel(radius: 22)
+                        iconPickerButton
+                        identityPanel
 
                         ForEach(Array(accounts.indices), id: \.self) { index in loginEditor(index) }
 
-                        Button { accounts.append(LoginAccount(username: "", password: "")) } label: {
-                            Label("添加账号", systemImage: "person.badge.plus").fontWeight(.semibold).frame(maxWidth: .infinity).padding(.vertical, 15)
-                        }.buttonStyle(.plain).iosPanel(radius: 22)
+                        addAccountButton
+                        notePanel
 
-                        TextField("备注（可选）", text: $note, axis: .vertical).lineLimit(4, reservesSpace: true).padding(16)
-                            .background(IOSTheme.input, in: RoundedRectangle(cornerRadius: 18)).padding(12).iosPanel(radius: 22)
-
-                        VStack(spacing: 10) {
-                            if !attachments.isEmpty {
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack {
-                                        ForEach(attachments) { attachment in
-                                            if let image = UIImage(data: attachment.data) {
-                                                Image(uiImage: image).resizable().scaledToFill().frame(width: 76, height: 76).clipShape(RoundedRectangle(cornerRadius: 14))
-                                                    .contextMenu { Button("删除", role: .destructive) { attachments.removeAll { $0.id == attachment.id } } }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            Text("已选 \(attachments.count)/5 张")
-                                .font(.caption).foregroundStyle(.secondary)
-                            PhotosPicker(selection: $selectedPhotos, maxSelectionCount: max(1, 5 - attachments.count), matching: .images) {
-                                Label("添加图片", systemImage: "photo.badge.plus").frame(maxWidth: .infinity).padding(.vertical, 15)
-                            }.buttonStyle(.plain)
-                        }.padding(12).iosPanel(radius: 22)
+                        attachmentPanel
                     }.padding(18)
                 }
             }
-            .navigationTitle(Text(LocalizedStringKey(item == nil ? "添加账户" : "编辑账户"))).navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("取消") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") { save() }.fontWeight(.bold).foregroundStyle(canSave ? .black : .secondary)
-                        .padding(.horizontal, 14).padding(.vertical, 8).background(canSave ? IOSTheme.accent : Color.secondary.opacity(0.15), in: Capsule()).disabled(!canSave)
-                }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                IOSModalHeader(
+                    title: LocalizedStringKey(item == nil ? "添加账户" : "编辑账户"),
+                    canSave: canSave,
+                    cancel: { dismiss() },
+                    save: save
+                )
             }
+            .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $showIconPicker) { IOSIconPickerView(symbol: $symbol, iconData: $iconData) }
             .sheet(isPresented: $showTagPicker) { IOSTagPickerView(selection: $selectedTags) }
             .sheet(isPresented: $showFieldPicker) {
-                IOSFieldTemplatePickerView { fieldName, secret in
-                    guard accounts.indices.contains(fieldTarget) else { return }
-                    accounts[fieldTarget].fields.append(CustomField(name: fieldName, value: "", isSecret: secret))
-                }
+                IOSFieldTemplatePickerView(onSelect: addSelectedField)
             }
             .sheet(isPresented: $showGenerator) {
-                IOSPasswordGeneratorView { generated in
-                    if accounts.indices.contains(generatorTarget) { accounts[generatorTarget].password = generated }
-                    showGenerator = false
-                }
+                IOSPasswordGeneratorView(onUse: applyGeneratedPassword)
             }
             .onChange(of: selectedPhotos) { _, photos in Task { await addAttachments(photos) } }
             .alert("无法添加图片", isPresented: Binding(get: { validationMessage != nil }, set: { if !$0 { validationMessage = nil } })) {
@@ -231,28 +232,258 @@ struct IOSAccountEditorView: View {
                 Spacer()
                 if accounts.count > 1 { Button(role: .destructive) { accounts.remove(at: index) } label: { Image(systemName: "minus.circle.fill") } }
             }
-            inputField("用户名 / 手机号 / 邮箱", text: $accounts[index].username)
-            HStack {
-                SecureField("密码", text: $accounts[index].password)
-                Button { generatorTarget = index; showGenerator = true } label: { Image(systemName: "dice.fill") }.accessibilityLabel("生成密码")
-            }.padding(.horizontal, 16).frame(minHeight: 50).background(IOSTheme.input, in: RoundedRectangle(cornerRadius: 17))
-            ForEach(Array(accounts[index].fields.indices), id: \.self) { fieldIndex in
-                HStack(spacing: 8) {
-                    TextField("字段名", text: $accounts[index].fields[fieldIndex].name).frame(width: 108)
-                    Divider().frame(height: 24)
-                    if accounts[index].fields[fieldIndex].isSecret { SecureField("字段内容", text: $accounts[index].fields[fieldIndex].value) }
-                    else { TextField("字段内容", text: $accounts[index].fields[fieldIndex].value) }
-                    Button(role: .destructive) { accounts[index].fields.remove(at: fieldIndex) } label: { Image(systemName: "minus.circle.fill") }
-                }.padding(.horizontal, 14).frame(minHeight: 50).background(IOSTheme.input, in: RoundedRectangle(cornerRadius: 17))
-            }
+            fieldList(index)
             Button { fieldTarget = index; showFieldPicker = true } label: {
                 Label("添加字段", systemImage: "plus").frame(maxWidth: .infinity).padding(.vertical, 14)
             }.buttonStyle(.plain).background(IOSTheme.input, in: Capsule())
         }.padding(12).iosPanel(radius: 22)
     }
 
+
     private func inputField(_ placeholder: String, text: Binding<String>) -> some View {
         TextField(placeholder, text: text).padding(.horizontal, 16).frame(minHeight: 50).background(IOSTheme.input, in: RoundedRectangle(cornerRadius: 17))
+    }
+
+    private var categoryPicker: some View {
+        Menu {
+            Picker("分类", selection: Binding(get: { categoryID ?? store.categories.first?.id }, set: { categoryID = $0 })) {
+                ForEach(store.categories) { category in
+                    Text(LocalizedStringKey(category.name)).tag(Optional(category.id))
+                }
+            }
+        } label: {
+            HStack {
+                Text("分类").foregroundStyle(.secondary)
+                Spacer()
+                Text(LocalizedStringKey(selectedCategoryName)).foregroundStyle(.primary)
+                Image(systemName: "chevron.up.chevron.down").font(.caption).foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 16)
+            .frame(minHeight: 50)
+            .background(IOSTheme.input, in: RoundedRectangle(cornerRadius: 17))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var iconPickerButton: some View {
+        Button { showIconPicker = true } label: {
+            VStack(spacing: 9) {
+                IOSVaultIcon(symbol: symbol, data: iconData, size: 72, background: IOSTheme.accent)
+                Text("图标选择").font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity).padding(.vertical, 18).iosPanel(radius: 22)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var identityPanel: some View {
+        VStack(spacing: 10) {
+            inputField("名称", text: $name)
+            Button { showTagPicker = true } label: {
+                HStack {
+                    Text(selectedTags.isEmpty ? "标签" : selectedTags.sorted().joined(separator: "、"))
+                        .foregroundStyle(selectedTags.isEmpty ? .secondary : .primary)
+                    Spacer()
+                    Image(systemName: "tag")
+                }
+                .padding(.horizontal, 16).frame(minHeight: 50)
+                .background(IOSTheme.input, in: RoundedRectangle(cornerRadius: 17))
+            }
+            .buttonStyle(.plain)
+            categoryPicker
+        }
+        .padding(12)
+        .iosPanel(radius: 22)
+    }
+
+    private var addAccountButton: some View {
+        Button { accounts.append(LoginAccount(username: "", password: "")) } label: {
+            Label("添加账号", systemImage: "person.badge.plus")
+                .fontWeight(.semibold).frame(maxWidth: .infinity).padding(.vertical, 15)
+        }
+        .buttonStyle(.plain)
+        .iosPanel(radius: 22)
+    }
+
+    private var notePanel: some View {
+        TextField("备注（可选）", text: $note, axis: .vertical)
+            .lineLimit(4, reservesSpace: true)
+            .padding(16)
+            .background(IOSTheme.input, in: RoundedRectangle(cornerRadius: 18))
+            .padding(12)
+            .iosPanel(radius: 22)
+    }
+
+    private var attachmentPanel: some View {
+        VStack(spacing: 10) {
+            if !attachments.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack {
+                        ForEach(attachments) { attachment in
+                            if let image = UIImage(data: attachment.data) {
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 76, height: 76)
+                                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                                    .contextMenu {
+                                        Button("删除", role: .destructive) { removeAttachment(attachment.id) }
+                                    }
+                            }
+                        }
+                    }
+                }
+            }
+            Text("已选 \(attachments.count)/5 张").font(.caption).foregroundStyle(.secondary)
+            PhotosPicker(selection: $selectedPhotos, maxSelectionCount: max(1, 5 - attachments.count), matching: .images) {
+                Label("添加图片", systemImage: "photo.badge.plus").frame(maxWidth: .infinity).padding(.vertical, 15)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(12)
+        .iosPanel(radius: 22)
+    }
+
+    private func removeAttachment(_ id: UUID) {
+        attachments.removeAll { $0.id == id }
+    }
+
+    private func applyGeneratedPassword(_ generated: String) {
+        guard accounts.indices.contains(generatorTarget) else { return }
+        accounts[generatorTarget].password = generated
+        showGenerator = false
+    }
+
+    private func addSelectedField(_ fieldName: String, _ secret: Bool) {
+        guard accounts.indices.contains(fieldTarget) else { return }
+        if fieldName == "账户", !accounts[fieldTarget].hasUsernameField {
+            accounts[fieldTarget].addUsernameField()
+        } else if fieldName == "密码", !accounts[fieldTarget].hasPasswordField {
+            accounts[fieldTarget].addPasswordField()
+        } else {
+            accounts[fieldTarget].appendField(CustomField(name: fieldName, value: "", isSecret: secret))
+        }
+    }
+
+    private func fieldList(_ accountIndex: Int) -> some View {
+        let fieldIDs = accounts[accountIndex].orderedFieldIDs
+        return List {
+            ForEach(fieldIDs, id: \.self) { fieldID in
+                HStack(spacing: 8) {
+                    fieldRow(accountIndex, fieldID: fieldID)
+                    IOSFieldDragHandle(
+                        onStart: { beginFieldDrag(fieldID) },
+                        onChanged: { updateFieldDrag(accountIndex, fieldID: fieldID, translation: $0) },
+                        onEnded: endFieldDrag
+                    )
+                }
+                    .padding(.leading, 2)
+                    .padding(.trailing, 10)
+                    .background(IOSTheme.input, in: RoundedRectangle(cornerRadius: 17))
+                    .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        Button("删除", role: .destructive) {
+                            accounts[accountIndex].removeField(fieldID)
+                        }
+                        .tint(.red)
+                    }
+                    .offset(y: draggedFieldID == fieldID ? dragOffsetY : 0)
+                    .zIndex(draggedFieldID == fieldID ? 1 : 0)
+            }
+        }
+        .scrollDisabled(true)
+        .scrollContentBackground(.hidden)
+        .listStyle(.plain)
+        .frame(height: CGFloat(max(fieldIDs.count, 1)) * 60)
+    }
+
+    private func beginFieldDrag(_ fieldID: UUID) {
+        guard draggedFieldID == nil else { return }
+        draggedFieldID = fieldID
+        processedDragSteps = 0
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+    }
+
+    private func updateFieldDrag(_ accountIndex: Int, fieldID: UUID, translation: CGFloat) {
+        guard draggedFieldID == fieldID else { return }
+        let requestedSteps = Int(translation / 60)
+        let delta = requestedSteps - processedDragSteps
+        var order = accounts[accountIndex].orderedFieldIDs
+        if delta != 0, let source = order.firstIndex(of: fieldID) {
+            let target = min(max(source + delta, 0), order.count - 1)
+            let actualDelta = target - source
+            if actualDelta != 0 {
+                order.move(
+                    fromOffsets: IndexSet(integer: source),
+                    toOffset: target > source ? target + 1 : target
+                )
+                processedDragSteps += actualDelta
+                withAnimation(.snappy(duration: 0.16)) {
+                    accounts[accountIndex].fieldOrder = order
+                }
+            }
+        }
+        let remainder = translation - CGFloat(processedDragSteps) * 60
+        dragOffsetY = min(max(remainder, -30), 30)
+    }
+
+    private func endFieldDrag() {
+        withAnimation(.snappy(duration: 0.14)) { dragOffsetY = 0 }
+        draggedFieldID = nil
+        processedDragSteps = 0
+    }
+
+    private func fieldRow(_ accountIndex: Int, fieldID: UUID) -> AnyView {
+        if fieldID == accounts[accountIndex].usernameFieldID {
+            return AnyView(
+                TextField("用户名 / 手机号 / 邮箱", text: $accounts[accountIndex].username)
+                    .padding(.horizontal, 16).frame(minHeight: 50)
+            )
+        }
+        if fieldID == accounts[accountIndex].passwordFieldID {
+            return AnyView(
+                HStack(spacing: 8) {
+                    Group {
+                        if visibleEditorPasswords.contains(fieldID) { TextField("密码", text: $accounts[accountIndex].password) }
+                        else { SecureField("密码", text: $accounts[accountIndex].password) }
+                    }
+                    Button { togglePasswordVisibility(fieldID) } label: {
+                        Image(systemName: visibleEditorPasswords.contains(fieldID) ? "eye.slash" : "eye")
+                    }
+                    Button { generatorTarget = accountIndex; showGenerator = true } label: { Image(systemName: "dice.fill") }
+                }
+                .padding(.horizontal, 16).frame(minHeight: 50)
+            )
+        }
+        guard let fieldIndex = accounts[accountIndex].fields.firstIndex(where: { $0.id == fieldID }) else {
+            return AnyView(EmptyView())
+        }
+        return AnyView(
+            HStack(spacing: 8) {
+                TextField("字段名", text: $accounts[accountIndex].fields[fieldIndex].name).frame(width: 88)
+                Divider().frame(height: 24)
+                Group {
+                    if accounts[accountIndex].fields[fieldIndex].isSecret && !visibleEditorPasswords.contains(fieldID) {
+                        SecureField("字段内容", text: $accounts[accountIndex].fields[fieldIndex].value)
+                    } else {
+                        TextField("字段内容", text: $accounts[accountIndex].fields[fieldIndex].value)
+                    }
+                }
+                if accounts[accountIndex].fields[fieldIndex].isSecret {
+                    Button { togglePasswordVisibility(fieldID) } label: {
+                        Image(systemName: visibleEditorPasswords.contains(fieldID) ? "eye.slash" : "eye")
+                    }
+                }
+            }
+            .padding(.horizontal, 14).frame(minHeight: 50)
+        )
+    }
+
+    private func togglePasswordVisibility(_ fieldID: UUID) {
+        if visibleEditorPasswords.contains(fieldID) { visibleEditorPasswords.remove(fieldID) }
+        else { visibleEditorPasswords.insert(fieldID) }
     }
 
     private func save() {
@@ -282,6 +513,37 @@ struct IOSAccountEditorView: View {
     }
 }
 
+private struct IOSFieldDragHandle: View {
+    let onStart: () -> Void
+    let onChanged: (CGFloat) -> Void
+    let onEnded: () -> Void
+
+    var body: some View {
+        Image(systemName: "line.3.horizontal")
+            .font(.body.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .frame(width: 32, height: 34)
+            .contentShape(Rectangle())
+            .gesture(
+                LongPressGesture(minimumDuration: 0.25)
+                    .sequenced(before: DragGesture(minimumDistance: 0, coordinateSpace: .local))
+                    .onChanged { value in
+                        switch value {
+                        case .first(true):
+                            onStart()
+                        case .second(true, let drag):
+                            onStart()
+                            if let drag { onChanged(drag.translation.height) }
+                        default:
+                            break
+                        }
+                    }
+                    .onEnded { _ in onEnded() }
+            )
+            .accessibilityLabel("拖动调整字段顺序")
+    }
+}
+
 struct IOSTagPickerView: View {
     @EnvironmentObject private var store: VaultStore
     @Environment(\.dismiss) private var dismiss
@@ -300,7 +562,6 @@ struct IOSTagPickerView: View {
 struct IOSFieldTemplatePickerView: View {
     @Environment(\.dismiss) private var dismiss
     let onSelect: (String, Bool) -> Void
-    @State private var customName = ""
     @State private var showCustom = false
     private let templates: [(String, String, Bool)] = [("账户", "person.crop.circle", false), ("密码", "key.fill", true), ("手机号", "phone.fill", false), ("邮箱", "envelope.fill", false), ("ID", "number", false), ("昵称", "person.fill", false), ("注册时间", "calendar", false), ("网址", "globe", false)]
     var body: some View {
@@ -313,8 +574,67 @@ struct IOSFieldTemplatePickerView: View {
                 }
                 Button { showCustom = true } label: { Label("自定义", systemImage: "plus.circle") }
             }.navigationTitle("添加字段").toolbar { ToolbarItem(placement: .cancellationAction) { Button("取消") { dismiss() } } }
-            .alert("自定义字段", isPresented: $showCustom) { TextField("字段名称", text: $customName); Button("取消", role: .cancel) {}; Button("添加") { onSelect(customName, false); dismiss() }.disabled(customName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) }
+            .sheet(isPresented: $showCustom) {
+                IOSCustomFieldView { name, isSecret in
+                    onSelect(name, isSecret)
+                    dismiss()
+                }
+            }
         }
+    }
+}
+
+private struct IOSCustomFieldView: View {
+    @Environment(\.dismiss) private var dismiss
+    let onAdd: (String, Bool) -> Void
+    @State private var name = ""
+    @State private var isSecret = false
+
+    private var trimmedName: String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                IOSTheme.background.ignoresSafeArea()
+                VStack(spacing: 14) {
+                    TextField("字段名称", text: $name)
+                        .padding(.horizontal, 16)
+                        .frame(minHeight: 52)
+                        .background(IOSTheme.input, in: RoundedRectangle(cornerRadius: 17))
+
+                    Toggle(isOn: $isSecret) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Label("加密字段", systemImage: isSecret ? "lock.fill" : "textformat")
+                                .font(.headline)
+                            Text("开启后默认隐藏内容，详情页可手动显示。")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .tint(IOSTheme.accent)
+                    .padding(16)
+                    .iosPanel(radius: 18)
+
+                    Spacer()
+                }
+                .padding(18)
+            }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                IOSModalHeader(
+                    title: "自定义字段",
+                    canSave: !trimmedName.isEmpty,
+                    cancel: { dismiss() },
+                    save: {
+                        onAdd(trimmedName, isSecret)
+                        dismiss()
+                    }
+                )
+            }
+            .toolbar(.hidden, for: .navigationBar)
+        }
+        .presentationDetents([.medium])
     }
 }
 
