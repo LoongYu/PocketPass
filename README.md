@@ -1,6 +1,6 @@
 # PocketPass｜口袋密码
 
-[English](README.en.md)
+<a href="#english">English</a>
 
 ## 中文
 
@@ -144,3 +144,56 @@ dist/PocketPass-V1.2(4)-20260921.dmg
 ## 开源许可
 
 本项目为个人、非商业使用许可。允许个人下载、运行和为个人用途修改；禁止商业使用、销售、出租、商业分发、商业托管或将本项目及其衍生作品用于商业服务。详情请见 [LICENSE](LICENSE)。密码管理器涉及敏感数据，使用前请自行评估安全风险并保留加密备份。
+
+<details id="english">
+<summary>English</summary>
+
+PocketPass is a local-first password manager for macOS, iPhone and iPad, built with Swift and SwiftUI. It stores vault data locally in an encrypted database and does not connect to iCloud in the current release.
+
+> Current version: **V1.2(4)**<br>
+> macOS: **26 or later**<br>
+> macOS architectures: **Apple Silicon and Intel (Universal Binary)**
+
+### Highlights
+
+- AES-GCM encrypted local vault for accounts, passwords, categories, tags and attachments.
+- Multiple login records per account, custom fields, field deletion and reordering.
+- Custom categories, tags, colors, icons and a local custom icon library.
+- Built-in icon search, App Store region selection, website favicons and local images.
+- Password generator, application lock, recycle bin and batch account management.
+- `.pocketpass` encrypted backup plus JSON, CSV and Markdown transfer formats.
+- Duplicate detection and idempotent repeated imports.
+- Import/export progress reporting and shared macOS/iOS/iPadOS data models.
+- Native Simplified Chinese and English localization.
+
+### Download
+
+Visit the [Releases](https://github.com/LoongYu/PocketPass/releases) page for the latest macOS Universal DMG and unsigned iOS/iPadOS IPA. Drag the macOS app to **Applications**. The iOS/iPadOS IPA must be signed with your own Apple ID or Apple Developer certificate before installation.
+
+### Build locally
+
+Requirements: Xcode and the macOS 26 SDK.
+
+```bash
+swift test
+swift run PocketPass
+./Scripts/build-release.sh
+```
+
+### Privacy and security
+
+PocketPass does not read the macOS Keychain, upload the vault, or include analytics or tracking SDKs. The current release is local-first and does not provide iCloud synchronization. Keep encrypted backups safe and evaluate the security risks before storing high-value credentials; the project has not undergone an independent security audit.
+
+### Roadmap
+
+- Password strength, weak-password and duplicate-password checks.
+- Developer ID signing, notarization and automatic updates.
+- More complete conflict handling and backup management.
+- End-to-end encrypted iCloud synchronization when the required Apple development capabilities are available.
+- Productization of the iPhone and iPad clients, browser extensions and system password autofill.
+
+### License
+
+PocketPass is licensed for personal, non-commercial use only. You may download, run and modify it for your own personal purposes. Commercial use, sale, rental, commercial redistribution, commercial hosting and use in a commercial service are not permitted. See [LICENSE](LICENSE) for the full terms.
+
+</details>
