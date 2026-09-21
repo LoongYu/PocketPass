@@ -1,21 +1,35 @@
-MIT License
-
+PocketPass Personal Non-Commercial License
 Copyright (c) 2026 LoongYu
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+1. Permission
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Permission is granted to an individual person to download, install, run, inspect,
+copy and modify this software solely for that person's personal, non-commercial
+use. Personal modifications may be kept private or shared with other individuals
+for their personal, non-commercial use, provided that this license remains with
+the software and the copyright notice is preserved.
+
+2. Restrictions
+
+Without prior written permission from the copyright holder, you may not:
+
+- use the software or any derivative work for a commercial purpose;
+- sell, rent, lease, sublicense, license, or commercially host the software;
+- distribute the software as part of a paid product, paid service, or organization;
+- use the software to provide a commercial service or to process data for paying
+  customers; or
+- remove the PocketPass branding or copyright notice from redistributed copies.
+
+3. No trademark license
+
+This license does not grant permission to use the names, logos, trademarks, or
+other brand assets of PocketPass or 口袋密码 except as necessary to identify an
+unmodified copy of the software.
+
+4. Disclaimer
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT OF
+OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
